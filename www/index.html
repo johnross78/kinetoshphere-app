@@ -5649,6 +5649,99 @@ function kinetospherePlayerOrigin(){
   return KINETOSPHERE_NATIVE ? KINETOSPHERE_PUBLIC_ORIGIN : window.location.origin;
 }
 
+// RC5: iOS uses the Capacitor YouTube plugin instead of the main WKWebView iframe.
+// The plugin owns a native WKWebView whose YouTube requests receive the required
+// Referer header. Web/desktop continues to use the existing YouTube IFrame API.
+const NATIVE_YT_PLAYER_ID="kinetosphere-native-youtube";
+let nativeYtCreated=false;
+let nativeYtVideoId="";
+let nativeYtFrameTimer=null;
+function nativeYoutubePlugin(){
+  return KINETOSPHERE_NATIVE ? (window.Capacitor?.Plugins?.YoutubePlayer || null) : null;
+}
+function nativeYoutubeFrame(){
+  const host=el("ytFrame");
+  if(!host) return null;
+  const r=host.getBoundingClientRect();
+  if(r.width<1 || r.height<1) return null;
+  return {
+    x:Math.max(0,Math.round(r.left)),
+    y:Math.max(0,Math.round(r.top)),
+    width:Math.max(200,Math.round(r.width)),
+    height:Math.max(200,Math.round(r.height))
+  };
+}
+async function syncNativeYoutubeFrame(){
+  const plugin=nativeYoutubePlugin();
+  if(!plugin || !nativeYtCreated || typeof plugin.setPlayerFrame!=="function") return;
+  const frame=nativeYoutubeFrame();
+  if(!frame) return;
+  try{ await plugin.setPlayerFrame({playerId:NATIVE_YT_PLAYER_ID,...frame}); }
+  catch(e){ console.warn("Native YouTube frame sync warning",e); }
+}
+function scheduleNativeYoutubeFrameSync(){
+  clearTimeout(nativeYtFrameTimer);
+  nativeYtFrameTimer=setTimeout(()=>syncNativeYoutubeFrame(),50);
+}
+window.addEventListener("resize",scheduleNativeYoutubeFrameSync,{passive:true});
+window.addEventListener("orientationchange",scheduleNativeYoutubeFrameSync,{passive:true});
+window.addEventListener("scroll",scheduleNativeYoutubeFrameSync,{passive:true});
+
+async function applyGymAudioToNativeYouTube(){
+  const plugin=nativeYoutubePlugin();
+  if(!plugin || !nativeYtCreated) return;
+  try{
+    if(gymVideoAudioMuted){
+      if(typeof plugin.setVolume==="function") await plugin.setVolume({playerId:NATIVE_YT_PLAYER_ID,volume:0});
+      if(typeof plugin.mute==="function") await plugin.mute({playerId:NATIVE_YT_PLAYER_ID});
+    }else{
+      if(typeof plugin.unMute==="function") await plugin.unMute({playerId:NATIVE_YT_PLAYER_ID});
+      if(typeof plugin.setVolume==="function") await plugin.setVolume({playerId:NATIVE_YT_PLAYER_ID,volume:100});
+    }
+  }catch(e){ console.warn("Native YouTube audio warning",e); }
+}
+async function destroyNativeYoutubePlayer(){
+  const plugin=nativeYoutubePlugin();
+  if(!plugin || !nativeYtCreated) return;
+  try{ await plugin.destroy({playerId:NATIVE_YT_PLAYER_ID}); }catch(e){ console.warn("Native YouTube destroy warning",e); }
+  nativeYtCreated=false;
+  nativeYtVideoId="";
+}
+async function loadNativeYoutubeMovement(videoId){
+  const plugin=nativeYoutubePlugin();
+  if(!plugin || !videoId) return false;
+  const host=el("ytFrame");
+  if(host) host.classList.remove("hidden");
+  const frame=nativeYoutubeFrame();
+  if(!frame){ setTimeout(()=>loadNativeYoutubeMovement(videoId),80); return true; }
+  try{
+    if(!nativeYtCreated){
+      const opts={
+        playerId:NATIVE_YT_PLAYER_ID,
+        videoId,
+        playerSize:{width:frame.width,height:frame.height},
+        playerFrame:frame,
+        playerVars:{autoplay:1,controls:1,playsinline:1,rel:0,loop:1,playlist:videoId},
+        debug:false
+      };
+      if(typeof plugin.createPlayer==="function") await plugin.createPlayer(opts);
+      else await plugin.initialize(opts);
+      nativeYtCreated=true;
+    }else if(nativeYtVideoId!==videoId){
+      await plugin.loadVideoById({playerId:NATIVE_YT_PLAYER_ID,options:{videoId}});
+    }
+    nativeYtVideoId=videoId;
+    if(typeof plugin.playVideo==="function") await plugin.playVideo({playerId:NATIVE_YT_PLAYER_ID});
+    await applyGymAudioToNativeYouTube();
+    scheduleNativeYoutubeFrameSync();
+    return true;
+  }catch(e){
+    console.error("Native YouTube player failed; falling back to iframe player",e);
+    await destroyNativeYoutubePlayer();
+    return false;
+  }
+}
+
 let initialVideoLoaded=false;
 let ytRetryTimer=null;
 
@@ -5682,8 +5775,6 @@ function ensureYouTubePlayer(videoId){
 
   if(ytPlayer) return;
 
-  // Create the persistent player without preloading Movement 1.
-  // Movement 1 is loaded only after onReady fires.
   ytPlayer=new YT.Player("ytFrame",{
     width:"100%",
     height:"100%",
@@ -5698,7 +5789,6 @@ function ensureYouTubePlayer(videoId){
       onReady:(event)=>{
         ytPlayerReady=true;
         try{ event.target.mute(); }catch(e){}
-        // Let YouTube finish its ready event before issuing the first load.
         setTimeout(()=>playPendingMovement(),0);
       },
       onStateChange:(event)=>{
@@ -5711,8 +5801,6 @@ function ensureYouTubePlayer(videoId){
       },
       onError:(event)=>{
         console.warn("YouTube player error",event.data);
-        // The first movement can occasionally race player startup on Safari/iOS.
-        // Retry that same movement once after readiness has settled.
         if(ytPlayerReady && pendingVideoId && !initialVideoLoaded){
           clearTimeout(ytRetryTimer);
           ytRetryTimer=setTimeout(()=>playPendingMovement(),300);
@@ -5766,10 +5854,12 @@ function updateGymVideoAudioButton(){
   btn.classList.toggle("secondary",gymVideoAudioMuted);
 }
 function applyGymAudioToYouTube(){
+  if(KINETOSPHERE_NATIVE && nativeYoutubePlugin()){
+    applyGymAudioToNativeYouTube();
+    return;
+  }
   if(!ytPlayerReady || !ytPlayer) return;
   try{
-    // v6.10.16: true provider mute. Countdown/workout cues now use a separate
-    // Kinetosphere-owned audio channel, so YouTube no longer needs to stay unmuted.
     if(gymVideoAudioMuted){
       if(typeof ytPlayer.setVolume==="function") ytPlayer.setVolume(0);
       if(typeof ytPlayer.mute==="function") ytPlayer.mute();
@@ -5780,16 +5870,12 @@ function applyGymAudioToYouTube(){
   }catch(e){ console.warn("YouTube audio toggle unavailable",e); }
 }
 function scheduleGymAudioForYouTube(){
-  // The protected persistent YouTube engine mutes each fresh load. Reapply the
-  // John's Gym state after the provider has settled, without modifying that engine.
   [0,100,300,700,1200].forEach(delay=>setTimeout(()=>applyGymAudioToYouTube(),delay));
 }
 function applyGymAudioToStream(){
   const frame=el("streamFrame");
   if(!frame || frame.classList.contains("hidden") || typeof Stream!=="function") return;
   try{
-    // Reuse the SDK player when available so the mute command targets the exact
-    // active Stream iframe. Setting both muted and volume makes silence explicit.
     streamSdkPlayer=streamSdkPlayer || Stream(frame);
     streamSdkPlayer.muted=Boolean(gymVideoAudioMuted);
     streamSdkPlayer.volume=gymVideoAudioMuted ? 0 : 1;
@@ -5801,8 +5887,6 @@ function scheduleGymAudioForStream(){
 function applyGymVideoAudioState(){
   const offlineVideo=el("offlineVideoFrame"); if(offlineVideo){ offlineVideo.muted=Boolean(gymVideoAudioMuted); offlineVideo.volume=gymVideoAudioMuted?0:1; }
   updateGymVideoAudioButton();
-  // Apply to both provider objects. The hidden/inactive one is harmless; this
-  // prevents provider-state races from leaving audible playback behind.
   scheduleGymAudioForYouTube();
   scheduleGymAudioForStream();
 }
@@ -5824,12 +5908,16 @@ function stopHostedMovementVideo(){
   activeHostedVideoId="";
 }
 
-function showYouTubeMovementVideo(videoId){
+async function showYouTubeMovementVideo(videoId){
   stopOfflineMovementVideo();
   const yt=el("ytFrame");
   if(activeVideoProvider==="cloudflare_stream") stopHostedMovementVideo();
   if(yt) yt.classList.remove("hidden");
   activeVideoProvider="youtube";
+  if(KINETOSPHERE_NATIVE && nativeYoutubePlugin()){
+    const nativeOk=await loadNativeYoutubeMovement(videoId);
+    if(nativeOk){ scheduleGymAudioForYouTube(); updateGymVideoAudioButton(); return; }
+  }
   loadMovementVideo(videoId);
   scheduleGymAudioForYouTube();
   updateGymVideoAudioButton();
@@ -5841,6 +5929,7 @@ function showHostedMovementVideo(videoId,loopUntilAdvance=true,muted=false){
   const yt=el("ytFrame");
   if(!frame || !videoId) return;
   if(yt) yt.classList.add("hidden");
+  if(KINETOSPHERE_NATIVE) destroyNativeYoutubePlayer();
   if(ytPlayerReady && ytPlayer){ try{ ytPlayer.stopVideo(); }catch(e){} }
   const shouldLoop=loopUntilAdvance!==false;
   const src=`https://iframe.videodelivery.net/${encodeURIComponent(videoId)}?autoplay=true&muted=${gymVideoAudioMuted?"true":"false"}&controls=true&preload=auto${shouldLoop?"&loop=true":""}`;
@@ -5885,6 +5974,7 @@ function loadExerciseVideo(ex){
 function stopAllMovementVideo(){
   stopOfflineMovementVideo();
   stopHostedMovementVideo();
+  if(KINETOSPHERE_NATIVE) destroyNativeYoutubePlayer();
   const yt=el("ytFrame");
   if(yt) yt.classList.remove("hidden");
   if(ytPlayerReady && ytPlayer){ try{ ytPlayer.stopVideo(); }catch(e){} }

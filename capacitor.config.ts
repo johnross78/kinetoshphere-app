@@ -9,9 +9,9 @@ const config: CapacitorConfig = {
   },
   plugins: {
     YoutubePlayer: {
-      // The Kinetosphere player remains our existing inline IFrame API player.
-      // This plugin's Capacitor 8 sync hook patches the main WKWebView so
-      // YouTube requests carry a valid HTTPS Referer on iOS/iPadOS.
+      // RC5 uses the plugin's native iOS YouTube player for YouTube-hosted exercises.
+      // Keep the main-WebView patch as a fallback for any remaining embeds, and
+      // use the plugin's internal WKWebView Referer fix for Error 152/153.
       patchRefererHeader: true,
       refererHeader: 'https://www.youtube.com'
     }
