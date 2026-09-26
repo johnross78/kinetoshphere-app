@@ -1,0 +1,23 @@
+{
+  "name": "kinetosphere-mobile",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Kinetosphere iOS/Android Capacitor release candidate synchronized with web v6.10.16.",
+  "scripts": {
+    "cap:sync": "npx cap sync",
+    "cap:add:ios": "npx cap add ios",
+    "cap:open:ios": "npx cap open ios",
+    "cap:open:android": "npx cap open android"
+  },
+  "dependencies": {
+    "@capacitor/core": "8.0.0",
+    "@capacitor/filesystem": "8.0.0",
+    "@capacitor/haptics": "8.0.0",
+    "@capacitor/network": "8.0.0",
+    "@capacitor/share": "8.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "8.0.0",
+    "@capacitor/ios": "8.0.0"
+  }
+}

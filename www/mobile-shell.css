@@ -1,0 +1,118 @@
+/* Kinetosphere mobile presentation layer — shared with Capacitor shell */
+@media (max-width: 760px) {
+  html, body { width:100%; overflow-x:hidden; }
+  body { padding:0; }
+  .app {
+    width:100%;
+    min-width:0 !important;
+    padding:8px 8px calc(18px + env(safe-area-inset-bottom));
+  }
+  .topbar {
+    position:sticky;
+    top:0;
+    z-index:900;
+    margin:-8px -8px 10px;
+    padding:calc(8px + env(safe-area-inset-top)) 8px 8px;
+    background:rgba(13,17,23,.94);
+    backdrop-filter:blur(16px);
+    border-bottom:1px solid var(--border);
+    flex-direction:column;
+    align-items:stretch;
+    gap:8px;
+  }
+  .brand { min-width:0; justify-content:space-between; }
+  .brand-logo { height:38px; max-width:72vw; }
+  .tabs {
+    display:flex;
+    gap:6px;
+    flex-wrap:nowrap;
+    overflow-x:auto;
+    overscroll-behavior-x:contain;
+    scrollbar-width:none;
+    padding-bottom:1px;
+  }
+  .tabs::-webkit-scrollbar { display:none; }
+  .tab { flex:0 0 auto; padding:10px 12px; border-radius:10px; }
+  .panel { padding:12px; border-radius:14px; }
+  .grid,.builder-grid,.row,.row3,.training-fields,.metrics,.controls,.cloud-grid { grid-template-columns:1fr !important; }
+  .filterbar { grid-template-columns:1fr 1fr !important; }
+  .exercise-list { grid-template-columns:repeat(2,minmax(0,1fr)) !important; }
+  .modal { padding:12px; }
+  .modal-card { width:calc(100vw - 24px) !important; min-width:0 !important; max-width:none !important; max-height:calc(100vh - 24px); }
+  .item { min-width:0; }
+  .provider-detail-page { padding:8px; border-radius:16px; }
+  .provider-landing-header,.provider-landing-copy { padding:14px; }
+  .provider-hero-media { aspect-ratio:16/9; }
+  .provider-detail-stats { grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; }
+  .provider-stat { padding:9px; }
+  .provider-stat strong { font-size:19px; }
+  .program-card,.discover-card { border-radius:12px; }
+  button,.btn,.tab,input,select,textarea { min-height:44px; }
+  .global-sync-badge { top:calc(8px + env(safe-area-inset-top)); }
+}
+
+@media (max-width: 480px) {
+  .filterbar { grid-template-columns:1fr !important; }
+  .provider-detail-stats { grid-template-columns:1fr; }
+  .discover-grid { grid-template-columns:1fr !important; }
+}
+
+
+/* v6.10.6 mobile app navigation + player/offline foundation */
+.mobile-bottom-nav,.mobile-network-status{display:none}
+@media (max-width:760px){
+  .app{padding-bottom:calc(88px + env(safe-area-inset-bottom))}
+  .topbar>.tabs{display:none}
+  .topbar{padding-bottom:7px}
+  .mobile-bottom-nav{
+    display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;z-index:1200;
+    padding:7px 7px calc(7px + env(safe-area-inset-bottom));gap:4px;background:rgba(13,17,23,.96);
+    backdrop-filter:blur(18px);border-top:1px solid var(--border);box-shadow:0 -10px 28px rgba(0,0,0,.22)
+  }
+  .mobile-nav-btn{border:0;background:transparent;color:var(--muted);min-width:0;min-height:52px;padding:5px 2px;border-radius:11px;font-size:10px;font-weight:800;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
+  .mobile-nav-btn.active{color:var(--text);background:rgba(255,255,255,.08)}
+  .mobile-nav-icon{font-size:18px;line-height:1}
+  .mobile-network-status{display:block;position:fixed;right:8px;top:calc(7px + env(safe-area-inset-top));z-index:1300;padding:4px 8px;border:1px solid var(--border);border-radius:999px;background:rgba(13,17,23,.82);backdrop-filter:blur(12px);color:var(--muted);font-size:10px;font-weight:800;pointer-events:none}
+  .mobile-network-status.is-offline{color:#fbbf24;border-color:rgba(251,191,36,.5)}
+  #playerView .workout-shell{gap:8px}
+  #playerView .video-card,#playerView .info-card{border-radius:14px}
+  #playerView .controls{position:sticky;bottom:calc(68px + env(safe-area-inset-bottom));z-index:500;background:rgba(22,27,34,.94);backdrop-filter:blur(14px);padding:8px;margin:0 -4px -4px;border:1px solid var(--border);border-radius:13px;grid-template-columns:1fr 1fr!important}
+  #playerView #nextBtn{order:1}
+  #playerView #prevBtn{order:2}
+  #playerView #videoAudioBtn{order:3}
+  #playerView #restartBtn{order:4}
+  #playerView #nextBtn,#playerView #prevBtn{min-height:52px;font-size:15px}
+  #playerView .timer{font-size:clamp(44px,16vw,72px)}
+  #playerView .metrics{grid-template-columns:1fr 1fr!important}
+  #playerView .player-secondary-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+}
+
+/* v6.10.8 compact Player presentation */
+@media (max-width:760px){
+  #playerView .player-movement-bar{grid-template-columns:1fr;gap:8px;margin-bottom:8px}
+  #playerView .player-movement-copy h1{font-size:24px}
+  #playerView .player-movement-copy .prescription{font-size:19px;margin-top:4px}
+  #playerView .player-movement-copy .cue{font-size:14px}
+  #playerView .player-header-actions{justify-content:flex-end;max-width:none;gap:6px}
+  #playerView .player-header-actions .description-btn{min-height:40px;font-size:12px;padding:8px 9px}
+  #playerView .workout-shell{flex-direction:column;align-items:stretch}
+  #playerView .video-card,#playerView .info-card{width:100%;flex:0 0 auto}
+  #playerView .video-wrap{aspect-ratio:16/9}
+  #playerView .info-card{padding:10px 11px}
+  #playerView .rapid-muscle-image-wrap{height:168px}
+  #playerView .info-card.timed-mode .rapid-muscle-image-wrap{height:124px}
+  #playerView .timer-action-row{grid-template-columns:1.35fr .85fr 1fr!important;gap:6px}
+  #playerView .info-card:not(.timed-mode) .timer-action-row{grid-template-columns:1fr!important}
+  #playerView .controls{position:sticky;bottom:calc(68px + env(safe-area-inset-bottom));grid-template-columns:1fr 1fr!important}
+  #playerView #nextBtn{order:1;grid-column:1/-1}
+  #playerView #prevBtn{order:2}
+  #playerView #restartBtn{order:3}
+}
+
+/* v6.10.13 appearance-aware mobile chrome */
+@media (max-width:760px){
+  html[data-theme="light"] .topbar{background:rgba(255,255,255,.95)}
+  html[data-theme="light"] .mobile-bottom-nav{background:rgba(255,255,255,.97);box-shadow:0 -10px 28px rgba(23,32,42,.12)}
+  html[data-theme="light"] .mobile-network-status{background:rgba(255,255,255,.88)}
+  .mobile-nav-btn.active{background:var(--surface-soft)}
+}

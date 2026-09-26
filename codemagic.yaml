@@ -1,0 +1,80 @@
+workflows:
+  ios-simulator:
+    name: Kinetosphere iOS Simulator Compile
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    environment:
+      node: v22.11.0
+      xcode: latest
+      cocoapods: default
+    scripts:
+      - name: Install dependencies
+        script: npm install --no-audit --no-fund
+      - name: Create and sync Capacitor iOS project
+        script: |
+          if [ ! -d ios ]; then
+            npx cap add ios
+          fi
+          npx cap sync ios
+      - name: Build unsigned simulator app
+        script: |
+          xcodebuild \
+            -workspace "$CM_BUILD_DIR/ios/App/App.xcworkspace" \
+            -scheme App \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -derivedDataPath "$CM_BUILD_DIR/build-simulator" \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+      - name: Package simulator app
+        script: |
+          cd "$CM_BUILD_DIR/build-simulator/Build/Products/Debug-iphonesimulator"
+          ditto -c -k --sequesterRsrc --keepParent App.app "$CM_BUILD_DIR/Kinetosphere-Simulator.app.zip"
+    artifacts:
+      - Kinetosphere-Simulator.app.zip
+      - /tmp/xcodebuild_logs/*.log
+      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.app
+
+  ios-testflight:
+    name: Kinetosphere TestFlight Internal
+    max_build_duration: 120
+    instance_type: mac_mini_m2
+    integrations:
+      app_store_connect: Kinetosphere
+    environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.kinetosphere.app
+      vars:
+        XCODE_WORKSPACE: "ios/App/App.xcworkspace"
+        XCODE_SCHEME: "App"
+      node: v22.11.0
+      xcode: latest
+      cocoapods: default
+    scripts:
+      - name: Install dependencies
+        script: npm install --no-audit --no-fund
+      - name: Create and sync Capacitor iOS project
+        script: |
+          if [ ! -d ios ]; then
+            npx cap add ios
+          fi
+          npx cap sync ios
+      - name: Apply App Store provisioning profiles
+        script: |
+          xcode-project use-profiles --custom-export-options='\{"testFlightInternalTestingOnly": true\}'
+      - name: Build signed IPA
+        script: |
+          xcode-project build-ipa \
+            --workspace "$CM_BUILD_DIR/$XCODE_WORKSPACE" \
+            --scheme "$XCODE_SCHEME"
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - ios/App/build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.dSYM
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+        submit_to_app_store: false
