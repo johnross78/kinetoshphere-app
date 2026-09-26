@@ -750,6 +750,11 @@ button[data-delete-saved]:hover{background:#e8b5b5 !important;}
 #offlineVideoFrame.hidden{display:none;}
 #streamFrame.hidden{display:none;}
 #ytFrame.hidden{display:none!important;}
+.native-youtube-placeholder{width:100%;height:100%;min-height:220px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:24px;text-align:center;background:radial-gradient(circle at center,rgba(255,255,255,.055),rgba(0,0,0,.18));}
+.native-youtube-mark{font-size:46px;line-height:1;color:#fff;opacity:.94;}
+.native-youtube-copy{display:flex;flex-direction:column;gap:4px;color:#fff;}
+.native-youtube-copy span{font-size:12px;color:#aeb8c3;}
+.native-youtube-play{min-width:150px;margin-top:4px;}
 
 .player-secondary-actions{
   display:grid;
@@ -5649,44 +5654,29 @@ function kinetospherePlayerOrigin(){
   return KINETOSPHERE_NATIVE ? KINETOSPHERE_PUBLIC_ORIGIN : window.location.origin;
 }
 
-// RC5: iOS uses the Capacitor YouTube plugin instead of the main WKWebView iframe.
-// The plugin owns a native WKWebView whose YouTube requests receive the required
-// Referer header. Web/desktop continues to use the existing YouTube IFrame API.
+// RC6: iOS uses the Capacitor YouTube plugin in its native fullscreen/modal mode.
+// RC5 proved that the inline native overlay can exist without rendering reliably
+// inside our responsive player card. The card now remains a stable Kinetosphere
+// surface with an explicit Play Video control while the plugin owns playback.
 const NATIVE_YT_PLAYER_ID="kinetosphere-native-youtube";
 let nativeYtCreated=false;
 let nativeYtVideoId="";
-let nativeYtFrameTimer=null;
+let nativeYtLaunching=false;
 function nativeYoutubePlugin(){
   return KINETOSPHERE_NATIVE ? (window.Capacitor?.Plugins?.YoutubePlayer || null) : null;
 }
-function nativeYoutubeFrame(){
+function renderNativeYoutubePlaceholder(videoId,statusText="YouTube video available") {
   const host=el("ytFrame");
-  if(!host) return null;
-  const r=host.getBoundingClientRect();
-  if(r.width<1 || r.height<1) return null;
-  return {
-    x:Math.max(0,Math.round(r.left)),
-    y:Math.max(0,Math.round(r.top)),
-    width:Math.max(200,Math.round(r.width)),
-    height:Math.max(200,Math.round(r.height))
-  };
+  if(!host) return;
+  host.classList.remove("hidden");
+  host.innerHTML=`<div class="native-youtube-placeholder">
+    <div class="native-youtube-mark">▶</div>
+    <div class="native-youtube-copy"><strong>${statusText}</strong><span>Opens in the native iOS video player.</span></div>
+    <button class="btn good native-youtube-play" type="button">Play Video</button>
+  </div>`;
+  const btn=host.querySelector(".native-youtube-play");
+  if(btn) btn.onclick=()=>launchNativeYoutubeFullscreen(videoId);
 }
-async function syncNativeYoutubeFrame(){
-  const plugin=nativeYoutubePlugin();
-  if(!plugin || !nativeYtCreated || typeof plugin.setPlayerFrame!=="function") return;
-  const frame=nativeYoutubeFrame();
-  if(!frame) return;
-  try{ await plugin.setPlayerFrame({playerId:NATIVE_YT_PLAYER_ID,...frame}); }
-  catch(e){ console.warn("Native YouTube frame sync warning",e); }
-}
-function scheduleNativeYoutubeFrameSync(){
-  clearTimeout(nativeYtFrameTimer);
-  nativeYtFrameTimer=setTimeout(()=>syncNativeYoutubeFrame(),50);
-}
-window.addEventListener("resize",scheduleNativeYoutubeFrameSync,{passive:true});
-window.addEventListener("orientationchange",scheduleNativeYoutubeFrameSync,{passive:true});
-window.addEventListener("scroll",scheduleNativeYoutubeFrameSync,{passive:true});
-
 async function applyGymAudioToNativeYouTube(){
   const plugin=nativeYoutubePlugin();
   if(!plugin || !nativeYtCreated) return;
@@ -5702,44 +5692,55 @@ async function applyGymAudioToNativeYouTube(){
 }
 async function destroyNativeYoutubePlayer(){
   const plugin=nativeYoutubePlugin();
-  if(!plugin || !nativeYtCreated) return;
-  try{ await plugin.destroy({playerId:NATIVE_YT_PLAYER_ID}); }catch(e){ console.warn("Native YouTube destroy warning",e); }
+  if(plugin && nativeYtCreated){
+    try{ await plugin.destroy({playerId:NATIVE_YT_PLAYER_ID}); }catch(e){ console.warn("Native YouTube destroy warning",e); }
+  }
   nativeYtCreated=false;
   nativeYtVideoId="";
+  nativeYtLaunching=false;
 }
-async function loadNativeYoutubeMovement(videoId){
+async function launchNativeYoutubeFullscreen(videoId){
   const plugin=nativeYoutubePlugin();
-  if(!plugin || !videoId) return false;
-  const host=el("ytFrame");
-  if(host) host.classList.remove("hidden");
-  const frame=nativeYoutubeFrame();
-  if(!frame){ setTimeout(()=>loadNativeYoutubeMovement(videoId),80); return true; }
+  if(!plugin || !videoId || nativeYtLaunching) return false;
+  nativeYtLaunching=true;
+  renderNativeYoutubePlaceholder(videoId,"Opening video…");
   try{
-    if(!nativeYtCreated){
-      const opts={
-        playerId:NATIVE_YT_PLAYER_ID,
-        videoId,
-        playerSize:{width:frame.width,height:frame.height},
-        playerFrame:frame,
-        playerVars:{autoplay:1,controls:1,playsinline:1,rel:0,loop:1,playlist:videoId},
-        debug:false
-      };
-      if(typeof plugin.createPlayer==="function") await plugin.createPlayer(opts);
-      else await plugin.initialize(opts);
-      nativeYtCreated=true;
-    }else if(nativeYtVideoId!==videoId){
-      await plugin.loadVideoById({playerId:NATIVE_YT_PLAYER_ID,options:{videoId}});
-    }
+    if(nativeYtCreated) await destroyNativeYoutubePlayer();
+    const opts={
+      playerId:NATIVE_YT_PLAYER_ID,
+      videoId,
+      playerSize:{width:640,height:360},
+      fullscreen:true,
+      playerVars:{autoplay:1,controls:1,playsinline:0,rel:0,loop:1,playlist:videoId},
+      debug:false
+    };
+    await plugin.initialize(opts);
+    nativeYtCreated=true;
     nativeYtVideoId=videoId;
+    if(typeof plugin.toggleFullScreen==="function"){
+      try{ await plugin.toggleFullScreen({playerId:NATIVE_YT_PLAYER_ID,isFullScreen:true}); }catch(e){ console.warn("Native YouTube fullscreen toggle warning",e); }
+    }
     if(typeof plugin.playVideo==="function") await plugin.playVideo({playerId:NATIVE_YT_PLAYER_ID});
     await applyGymAudioToNativeYouTube();
-    scheduleNativeYoutubeFrameSync();
+    renderNativeYoutubePlaceholder(videoId,"Video ready");
     return true;
   }catch(e){
-    console.error("Native YouTube player failed; falling back to iframe player",e);
+    console.error("Native fullscreen YouTube player failed",e);
     await destroyNativeYoutubePlayer();
+    renderNativeYoutubePlaceholder(videoId,"Unable to open video");
     return false;
+  }finally{
+    nativeYtLaunching=false;
   }
+}
+async function loadNativeYoutubeMovement(videoId){
+  if(!nativeYoutubePlugin() || !videoId) return false;
+  if(nativeYtVideoId && nativeYtVideoId!==videoId) await destroyNativeYoutubePlayer();
+  nativeYtVideoId=videoId;
+  renderNativeYoutubePlaceholder(videoId);
+  // Native modal presentation is most reliable when initiated by a user gesture.
+  // Do not auto-open on every movement transition; the card remains actionable.
+  return true;
 }
 
 let initialVideoLoaded=false;
