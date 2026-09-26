@@ -778,7 +778,7 @@ button[data-delete-saved]:hover{background:#e8b5b5 !important;}
   .info-card{flex:1 1 28%}
 }
 
-/* v6.10.16 Player media-fit + compact header */
+/* v6.10.17 Player media-fit + compact header */
 .player-movement-bar{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:18px;align-items:start;margin:0 0 10px;padding:0 2px}
 .player-movement-copy{min-width:0}
 .player-movement-copy h1{margin:0;font-size:clamp(24px,2.35vw,38px);line-height:1.03;letter-spacing:-.035em}
@@ -806,7 +806,7 @@ button[data-delete-saved]:hover{background:#e8b5b5 !important;}
 .program-intro-mode .player-header-actions{display:none!important}
 @media (min-width:900px){.video-card{flex:0 0 70%}.info-card{flex:1 1 30%}}
 
-/* v6.10.16 Player header metrics + iPad audio/layout polish */
+/* v6.10.17 Player header metrics + iPad audio/layout polish */
 .player-movement-bar{grid-template-columns:minmax(0,1fr) minmax(390px,auto);align-items:start;gap:20px;margin-bottom:12px}
 .player-title-row{display:flex;align-items:center;gap:10px;min-width:0}
 .player-title-row h1{min-width:0}
@@ -844,7 +844,7 @@ button[data-delete-saved]:hover{background:#e8b5b5 !important;}
 }
 
 
-/* v6.10.16 Player visual polish */
+/* v6.10.17 Player visual polish */
 #movementName{color:var(--good)}
 #playerFavoriteBtn.is-favorite{color:#ef4444;background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.72)}
 .timer-mode-label{color:#ef6666!important;font-weight:900}
@@ -1197,7 +1197,7 @@ button[data-delete-saved]:hover{background:#e8b5b5 !important;}
 @media(max-width:700px){.discover-tools{grid-template-columns:1fr}}
 
 
-/* v6.10.16 Player prescription area + independent workout cue audio */
+/* v6.10.17 Player prescription area + independent workout cue audio */
 .player-header-prescription{display:none!important}
 .player-header-stack{gap:8px}
 .player-header-metrics{width:250px}
@@ -1234,7 +1234,7 @@ html[data-theme="light"] .provider-hero-media{background:rgba(23,32,42,.04)}
 #playerArea .metric,#playerArea input,#playerArea select,#playerArea textarea{background:var(--panel2);color:var(--text);border-color:var(--border)}
 #playerArea .meta,#playerArea .cue,#playerArea .small{color:var(--muted)}
 
-/* v6.10.16 favorite visibility + iPad Builder picker fit */
+/* v6.10.17 favorite visibility + iPad Builder picker fit */
 #playerFavoriteBtn{display:inline-flex!important;visibility:visible!important;opacity:1!important}
 #playerFavoriteBtn.is-favorite{color:#ef4444;background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.72)}
 @media (hover:none) and (pointer:coarse) and (min-width:761px){
@@ -1257,7 +1257,7 @@ html[data-theme="light"] .provider-hero-media{background:rgba(23,32,42,.04)}
     <div>
       <div class="brand">
         <img class="brand-logo" id="brandLogo" src="assets/brand/orbit-lockup-dark.svg" alt="Kinetosphere" />
-        <span class="version-badge admin-only hidden" id="headerVersionBadge">v6.10.16</span>
+        <span class="version-badge admin-only hidden" id="headerVersionBadge">v6.10.17</span>
       </div>
       <div class="sub" id="subtitle"></div>
     </div>
@@ -1600,7 +1600,7 @@ html[data-theme="light"] .provider-hero-media{background:rgba(23,32,42,.04)}
   <section id="profileView" class="hidden"><div class="panel"><h2>Profile</h2><div class="meta">Profile identity, avatar, bio, and future social visibility controls will live here.</div></div></section>
   <section id="billingView" class="hidden"><div class="panel"><h2>Billing</h2><div class="meta">Kinetosphere subscription and provider-access billing controls will live here.</div></div></section>
   <section id="supportView" class="hidden"><div class="panel"><h2>Support</h2><div class="meta">Help, feedback, provider-access troubleshooting, and support requests will live here.</div></div></section>
-  <section id="aboutView" class="hidden"><div class="panel"><h2>About Kinetosphere</h2><div class="meta" style="margin-bottom:12px">Kinetosphere brings circuit building, provider programs, workout playback, and connected training libraries into one experience.</div><div class="notice"><strong>Current version:</strong> v6.10.16</div></div></section>
+  <section id="aboutView" class="hidden"><div class="panel"><h2>About Kinetosphere</h2><div class="meta" style="margin-bottom:12px">Kinetosphere brings circuit building, provider programs, workout playback, and connected training libraries into one experience.</div><div class="notice"><strong>Current version:</strong> v6.10.17</div></div></section>
 
   <section id="importerView" class="hidden">
     <div class="panel">
@@ -5654,94 +5654,44 @@ function kinetospherePlayerOrigin(){
   return KINETOSPHERE_NATIVE ? KINETOSPHERE_PUBLIC_ORIGIN : window.location.origin;
 }
 
-// RC6: iOS uses the Capacitor YouTube plugin in its native fullscreen/modal mode.
-// RC5 proved that the inline native overlay can exist without rendering reliably
-// inside our responsive player card. The card now remains a stable Kinetosphere
-// surface with an explicit Play Video control while the plugin owns playback.
-const NATIVE_YT_PLAYER_ID="kinetosphere-native-youtube";
-let nativeYtCreated=false;
-let nativeYtVideoId="";
-let nativeYtLaunching=false;
-function nativeYoutubePlugin(){
-  return KINETOSPHERE_NATIVE ? (window.Capacitor?.Plugins?.YoutubePlayer || null) : null;
+// RC7 / TestFlight 1.0 (6): native iOS uses a same-origin HTTPS YouTube bridge
+// hosted by Kinetosphere. This keeps playback inline while ensuring YouTube sees
+// a normal HTTPS embedder origin rather than the Capacitor local scheme.
+let hostedYoutubeVideoId="";
+function hostedYoutubeFrame(){
+  return document.querySelector("#ytFrame iframe[data-kinetosphere-youtube-bridge]");
 }
-function renderNativeYoutubePlaceholder(videoId,statusText="YouTube video available") {
+function hostedYoutubePost(type,extra={}){
+  const frame=hostedYoutubeFrame();
+  if(!frame || !frame.contentWindow) return;
+  try{ frame.contentWindow.postMessage({source:"kinetosphere-parent",type,...extra},KINETOSPHERE_PUBLIC_ORIGIN); }catch(e){}
+}
+function loadHostedYoutubeBridge(videoId){
   const host=el("ytFrame");
-  if(!host) return;
-  host.classList.remove("hidden");
-  host.innerHTML=`<div class="native-youtube-placeholder">
-    <div class="native-youtube-mark">▶</div>
-    <div class="native-youtube-copy"><strong>${statusText}</strong><span>Opens in the native iOS video player.</span></div>
-    <button class="btn good native-youtube-play" type="button">Play Video</button>
-  </div>`;
-  const btn=host.querySelector(".native-youtube-play");
-  if(btn) btn.onclick=()=>launchNativeYoutubeFullscreen(videoId);
-}
-async function applyGymAudioToNativeYouTube(){
-  const plugin=nativeYoutubePlugin();
-  if(!plugin || !nativeYtCreated) return;
-  try{
-    if(gymVideoAudioMuted){
-      if(typeof plugin.setVolume==="function") await plugin.setVolume({playerId:NATIVE_YT_PLAYER_ID,volume:0});
-      if(typeof plugin.mute==="function") await plugin.mute({playerId:NATIVE_YT_PLAYER_ID});
-    }else{
-      if(typeof plugin.unMute==="function") await plugin.unMute({playerId:NATIVE_YT_PLAYER_ID});
-      if(typeof plugin.setVolume==="function") await plugin.setVolume({playerId:NATIVE_YT_PLAYER_ID,volume:100});
-    }
-  }catch(e){ console.warn("Native YouTube audio warning",e); }
-}
-async function destroyNativeYoutubePlayer(){
-  const plugin=nativeYoutubePlugin();
-  if(plugin && nativeYtCreated){
-    try{ await plugin.destroy({playerId:NATIVE_YT_PLAYER_ID}); }catch(e){ console.warn("Native YouTube destroy warning",e); }
+  if(!host || !videoId) return false;
+  const muted=gymVideoAudioMuted?"1":"0";
+  const src=`${KINETOSPHERE_PUBLIC_ORIGIN}/embed/youtube?id=${encodeURIComponent(videoId)}&muted=${muted}`;
+  if(hostedYoutubeVideoId!==videoId || !hostedYoutubeFrame()){
+    host.innerHTML=`<iframe data-kinetosphere-youtube-bridge title="Exercise demonstration" src="${src}" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin" style="width:100%;height:100%;display:block"></iframe>`;
+    hostedYoutubeVideoId=videoId;
+  } else {
+    hostedYoutubePost("load",{videoId});
+    hostedYoutubePost(gymVideoAudioMuted?"mute":"unmute");
+    hostedYoutubePost("play");
   }
-  nativeYtCreated=false;
-  nativeYtVideoId="";
-  nativeYtLaunching=false;
-}
-async function launchNativeYoutubeFullscreen(videoId){
-  const plugin=nativeYoutubePlugin();
-  if(!plugin || !videoId || nativeYtLaunching) return false;
-  nativeYtLaunching=true;
-  renderNativeYoutubePlaceholder(videoId,"Opening video…");
-  try{
-    if(nativeYtCreated) await destroyNativeYoutubePlayer();
-    const opts={
-      playerId:NATIVE_YT_PLAYER_ID,
-      videoId,
-      playerSize:{width:640,height:360},
-      fullscreen:true,
-      playerVars:{autoplay:1,controls:1,playsinline:0,rel:0,loop:1,playlist:videoId},
-      debug:false
-    };
-    await plugin.initialize(opts);
-    nativeYtCreated=true;
-    nativeYtVideoId=videoId;
-    if(typeof plugin.toggleFullScreen==="function"){
-      try{ await plugin.toggleFullScreen({playerId:NATIVE_YT_PLAYER_ID,isFullScreen:true}); }catch(e){ console.warn("Native YouTube fullscreen toggle warning",e); }
-    }
-    if(typeof plugin.playVideo==="function") await plugin.playVideo({playerId:NATIVE_YT_PLAYER_ID});
-    await applyGymAudioToNativeYouTube();
-    renderNativeYoutubePlaceholder(videoId,"Video ready");
-    return true;
-  }catch(e){
-    console.error("Native fullscreen YouTube player failed",e);
-    await destroyNativeYoutubePlayer();
-    renderNativeYoutubePlaceholder(videoId,"Unable to open video");
-    return false;
-  }finally{
-    nativeYtLaunching=false;
-  }
-}
-async function loadNativeYoutubeMovement(videoId){
-  if(!nativeYoutubePlugin() || !videoId) return false;
-  if(nativeYtVideoId && nativeYtVideoId!==videoId) await destroyNativeYoutubePlayer();
-  nativeYtVideoId=videoId;
-  renderNativeYoutubePlaceholder(videoId);
-  // Native modal presentation is most reliable when initiated by a user gesture.
-  // Do not auto-open on every movement transition; the card remains actionable.
   return true;
 }
+function stopHostedYoutubeBridge(){
+  const host=el("ytFrame");
+  if(host && hostedYoutubeFrame()) host.innerHTML="";
+  hostedYoutubeVideoId="";
+}
+
+window.addEventListener("message",(event)=>{
+  if(event.origin!==KINETOSPHERE_PUBLIC_ORIGIN) return;
+  const msg=event.data||{};
+  if(msg.source==="kinetosphere-youtube" && msg.type==="error") console.warn("Hosted YouTube bridge error",msg.data);
+});
 
 let initialVideoLoaded=false;
 let ytRetryTimer=null;
@@ -5855,8 +5805,8 @@ function updateGymVideoAudioButton(){
   btn.classList.toggle("secondary",gymVideoAudioMuted);
 }
 function applyGymAudioToYouTube(){
-  if(KINETOSPHERE_NATIVE && nativeYoutubePlugin()){
-    applyGymAudioToNativeYouTube();
+  if(KINETOSPHERE_NATIVE && hostedYoutubeFrame()){
+    hostedYoutubePost(gymVideoAudioMuted?"mute":"unmute");
     return;
   }
   if(!ytPlayerReady || !ytPlayer) return;
@@ -5915,9 +5865,9 @@ async function showYouTubeMovementVideo(videoId){
   if(activeVideoProvider==="cloudflare_stream") stopHostedMovementVideo();
   if(yt) yt.classList.remove("hidden");
   activeVideoProvider="youtube";
-  if(KINETOSPHERE_NATIVE && nativeYoutubePlugin()){
-    const nativeOk=await loadNativeYoutubeMovement(videoId);
-    if(nativeOk){ scheduleGymAudioForYouTube(); updateGymVideoAudioButton(); return; }
+  if(KINETOSPHERE_NATIVE){
+    const hostedOk=loadHostedYoutubeBridge(videoId);
+    if(hostedOk){ scheduleGymAudioForYouTube(); updateGymVideoAudioButton(); return; }
   }
   loadMovementVideo(videoId);
   scheduleGymAudioForYouTube();
@@ -5930,7 +5880,7 @@ function showHostedMovementVideo(videoId,loopUntilAdvance=true,muted=false){
   const yt=el("ytFrame");
   if(!frame || !videoId) return;
   if(yt) yt.classList.add("hidden");
-  if(KINETOSPHERE_NATIVE) destroyNativeYoutubePlayer();
+  if(KINETOSPHERE_NATIVE) stopHostedYoutubeBridge();
   if(ytPlayerReady && ytPlayer){ try{ ytPlayer.stopVideo(); }catch(e){} }
   const shouldLoop=loopUntilAdvance!==false;
   const src=`https://iframe.videodelivery.net/${encodeURIComponent(videoId)}?autoplay=true&muted=${gymVideoAudioMuted?"true":"false"}&controls=true&preload=auto${shouldLoop?"&loop=true":""}`;
@@ -5975,7 +5925,7 @@ function loadExerciseVideo(ex){
 function stopAllMovementVideo(){
   stopOfflineMovementVideo();
   stopHostedMovementVideo();
-  if(KINETOSPHERE_NATIVE) destroyNativeYoutubePlayer();
+  if(KINETOSPHERE_NATIVE) stopHostedYoutubeBridge();
   const yt=el("ytFrame");
   if(yt) yt.classList.remove("hidden");
   if(ytPlayerReady && ytPlayer){ try{ ytPlayer.stopVideo(); }catch(e){} }

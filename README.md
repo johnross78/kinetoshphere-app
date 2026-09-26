@@ -1,3 +1,7 @@
+Kinetosphere iOS RC7 / TestFlight build 1.0 (6)
+
+Hosted HTTPS YouTube bridge at https://circuitbuilder.rosshomegym.com/embed/youtube for inline iOS playback. Native YouTube plugin removed.
+
 # Kinetosphere Mobile — TestFlight RC6
 
 This package is the iOS development candidate synchronized with web baseline **v6.10.16**.

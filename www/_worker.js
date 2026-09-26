@@ -31,9 +31,65 @@ async function rapidFetch(env, path, searchParams) {
   });
 }
 
+
+function youtubeEmbedPage(requestUrl) {
+  const url = new URL(requestUrl);
+  const id = String(url.searchParams.get("id") || "").trim();
+  const muted = url.searchParams.get("muted") === "1";
+  if (!/^[A-Za-z0-9_-]{6,20}$/.test(id)) {
+    return new Response("Invalid video id", {status:400, headers:{"Content-Type":"text/plain; charset=utf-8"}});
+  }
+  const origin = url.origin;
+  const html = `<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<style>html,body,#player{margin:0;width:100%;height:100%;background:#000;overflow:hidden}iframe{display:block;width:100%;height:100%;border:0}</style></head>
+<body><div id="player"></div>
+<script src="https://www.youtube.com/iframe_api"></script>
+<script>
+const VIDEO_ID=${JSON.stringify(id)};
+const EMBED_ORIGIN=${JSON.stringify(origin)};
+const START_MUTED=${muted ? 'true':'false'};
+let player=null;
+function send(type,data){try{parent.postMessage({source:'kinetosphere-youtube',type,data:data||null},'*')}catch(e){}}
+window.onYouTubeIframeAPIReady=function(){
+ player=new YT.Player('player',{width:'100%',height:'100%',videoId:VIDEO_ID,playerVars:{autoplay:1,playsinline:1,rel:0,loop:1,playlist:VIDEO_ID,origin:EMBED_ORIGIN,widget_referrer:EMBED_ORIGIN},events:{
+  onReady:function(e){try{if(START_MUTED)e.target.mute();else e.target.unMute();e.target.playVideo()}catch(_){} send('ready')},
+  onStateChange:function(e){if(e.data===YT.PlayerState.ENDED){try{e.target.seekTo(0,true);e.target.playVideo()}catch(_){}}},
+  onError:function(e){send('error',e.data)}
+ }});
+};
+window.addEventListener('message',function(ev){
+ const m=ev.data||{}; if(m.source!=='kinetosphere-parent'||!player)return;
+ try{
+  if(m.type==='mute') player.mute();
+  else if(m.type==='unmute'){player.unMute();player.setVolume(100)}
+  else if(m.type==='play') player.playVideo();
+  else if(m.type==='pause') player.pauseVideo();
+  else if(m.type==='load'&&m.videoId){player.loadVideoById(m.videoId)}
+ }catch(_){}
+});
+<\/script></body></html>`;
+  return new Response(html, {
+    status:200,
+    headers:{
+      "Content-Type":"text/html; charset=utf-8",
+      "Cache-Control":"no-store",
+      "Referrer-Policy":"strict-origin-when-cross-origin",
+      "X-Content-Type-Options":"nosniff",
+      "Content-Security-Policy":"default-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://i.ytimg.com https://*.googlevideo.com; script-src 'self' 'unsafe-inline' https://www.youtube.com https://s.ytimg.com; frame-src https://www.youtube.com https://www.youtube-nocookie.com; img-src 'self' data: https://i.ytimg.com https://*.ytimg.com; media-src https://*.googlevideo.com; connect-src https://www.youtube.com https://*.googlevideo.com; style-src 'unsafe-inline';"
+    }
+  });
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+
+
+    if (url.pathname === "/embed/youtube") {
+      return youtubeEmbedPage(request.url);
+    }
 
     if (url.pathname === "/api/muscle-groups") {
       const upstream = await rapidFetch(env, "/v2/muscle-groups", []);

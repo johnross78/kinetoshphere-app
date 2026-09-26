@@ -1,8 +1,8 @@
 {
   "name": "kinetosphere-mobile",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "private": true,
-  "description": "Kinetosphere iOS TestFlight RC6: native fullscreen/modal YouTube playback for iOS, synchronized with web v6.10.16.",
+  "description": "Kinetosphere iOS TestFlight RC7 / build 6: hosted HTTPS YouTube bridge for inline iOS playback, synchronized with web v6.10.17.",
   "scripts": {
     "cap:sync": "npx cap sync",
     "cap:add:ios": "npx cap add ios",
@@ -14,8 +14,7 @@
     "@capacitor/filesystem": "8.0.0",
     "@capacitor/haptics": "8.0.0",
     "@capacitor/network": "8.0.0",
-    "@capacitor/share": "8.0.0",
-    "@capgo/capacitor-youtube-player": "8.3.3"
+    "@capacitor/share": "8.0.0"
   },
   "devDependencies": {
     "@capacitor/cli": "8.0.0",
