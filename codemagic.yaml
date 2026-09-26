@@ -64,7 +64,7 @@ workflows:
           npx cap sync ios
       - name: Apply App Store provisioning profiles
         script: |
-          xcode-project use-profiles --custom-export-options='\{"testFlightInternalTestingOnly": true\}'
+          xcode-project use-profiles --custom-export-options='{"testFlightInternalTestingOnly": true}'
       - name: Build signed IPA
         script: |
           xcode-project build-ipa \
