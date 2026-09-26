@@ -13,7 +13,7 @@ const config: CapacitorConfig = {
       // This plugin's Capacitor 8 sync hook patches the main WKWebView so
       // YouTube requests carry a valid HTTPS Referer on iOS/iPadOS.
       patchRefererHeader: true,
-      refererHeader: 'https://circuitbuilder.rosshomegym.com'
+      refererHeader: 'https://www.youtube.com'
     }
   }
 };
