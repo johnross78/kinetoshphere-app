@@ -16,10 +16,12 @@ workflows:
             npx cap add ios
           fi
           npx cap sync ios
+          echo "Generated iOS project:"
+          find "$CM_BUILD_DIR/ios/App" -maxdepth 2 -type d \( -name "*.xcodeproj" -o -name "*.xcworkspace" \) -print
       - name: Build unsigned simulator app
         script: |
           xcodebuild \
-            -workspace "$CM_BUILD_DIR/ios/App/App.xcworkspace" \
+            -project "$CM_BUILD_DIR/ios/App/App.xcodeproj" \
             -scheme App \
             -configuration Debug \
             -sdk iphonesimulator \
@@ -46,7 +48,7 @@ workflows:
         distribution_type: app_store
         bundle_identifier: com.kinetosphere.app
       vars:
-        XCODE_WORKSPACE: "ios/App/App.xcworkspace"
+        XCODE_PROJECT: "ios/App/App.xcodeproj"
         XCODE_SCHEME: "App"
       node: v22.11.0
       xcode: latest
@@ -66,7 +68,7 @@ workflows:
       - name: Build signed IPA
         script: |
           xcode-project build-ipa \
-            --workspace "$CM_BUILD_DIR/$XCODE_WORKSPACE" \
+            --project "$CM_BUILD_DIR/$XCODE_PROJECT" \
             --scheme "$XCODE_SCHEME"
     artifacts:
       - build/ios/ipa/*.ipa
