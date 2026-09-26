@@ -5637,6 +5637,18 @@ function getActiveItems(){
 let ytPlayer=null;
 let ytPlayerReady=false;
 let pendingVideoId=null;
+const KINETOSPHERE_PUBLIC_ORIGIN="https://circuitbuilder.rosshomegym.com";
+const KINETOSPHERE_NATIVE=Boolean(
+  (window.Capacitor && typeof window.Capacitor.isNativePlatform==="function" && window.Capacitor.isNativePlatform()) ||
+  !/^https?:$/.test(window.location.protocol)
+);
+function kinetosphereApiUrl(path){
+  return KINETOSPHERE_NATIVE ? KINETOSPHERE_PUBLIC_ORIGIN + path : path;
+}
+function kinetospherePlayerOrigin(){
+  return KINETOSPHERE_NATIVE ? KINETOSPHERE_PUBLIC_ORIGIN : window.location.origin;
+}
+
 let initialVideoLoaded=false;
 let ytRetryTimer=null;
 
@@ -5679,7 +5691,8 @@ function ensureYouTubePlayer(videoId){
       autoplay:1,
       playsinline:1,
       rel:0,
-      origin:window.location.origin
+      origin:kinetospherePlayerOrigin(),
+      widget_referrer:kinetospherePlayerOrigin()
     },
     events:{
       onReady:(event)=>{
@@ -5724,7 +5737,7 @@ function loadMovementVideo(videoId){
 }
 
 function embedUrl(id){
-  const origin = encodeURIComponent(window.location.origin);
+  const origin = encodeURIComponent(kinetospherePlayerOrigin());
   return `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&loop=1&playlist=${id}&playsinline=1&rel=0&origin=${origin}`;
 }
 
@@ -5921,19 +5934,28 @@ async function getRapidSupportedMuscles(){
   if(rapidSupportedMuscles) return rapidSupportedMuscles;
   if(rapidSupportedPromise) return rapidSupportedPromise;
   rapidSupportedPromise=(async()=>{
-    const response=await fetch("/api/muscle-groups",{cache:"force-cache"});
-    if(!response.ok) throw new Error(`Muscle group API ${response.status}`);
-    const data=await response.json();
-    let list=[];
-    if(Array.isArray(data)) list=data;
-    else if(Array.isArray(data.muscleGroups)) list=data.muscleGroups;
-    else if(Array.isArray(data.muscles)) list=data.muscles;
-    else if(Array.isArray(data.data)) list=data.data;
-    else list=Object.keys(data||{});
-    rapidSupportedMuscles=new Set(list.map(x=>{
-      if(typeof x==="string") return x;
-      return x?.name || x?.id || x?.slug || "";
-    }).filter(Boolean));
+    try{
+      const response=await fetch(kinetosphereApiUrl("/api/muscle-groups"),{cache:"force-cache"});
+      if(!response.ok) throw new Error(`Muscle group API ${response.status}`);
+      const data=await response.json();
+      let list=[];
+      if(Array.isArray(data)) list=data;
+      else if(Array.isArray(data.muscleGroups)) list=data.muscleGroups;
+      else if(Array.isArray(data.muscles)) list=data.muscles;
+      else if(Array.isArray(data.data)) list=data.data;
+      else list=Object.keys(data||{});
+      rapidSupportedMuscles=new Set(list.map(x=>{
+        if(typeof x==="string") return x;
+        return x?.name || x?.id || x?.slug || "";
+      }).filter(Boolean));
+    }catch(err){
+      if(!KINETOSPHERE_NATIVE) throw err;
+      // Native WKWebView can enforce CORS against the bundled custom scheme.
+      // The image endpoint itself can still be displayed cross-origin, so keep
+      // a bundled capability list as a resilient native fallback.
+      rapidSupportedMuscles=new Set(Object.values(RAPID_MUSCLE_CANDIDATES).flat());
+      console.warn("Using bundled muscle-group capability map on native",err);
+    }
     return rapidSupportedMuscles;
   })();
   try{return await rapidSupportedPromise}
@@ -6028,14 +6050,14 @@ async function updateMuscleMap(ex){
       if(!attemptedPrimaryOnly && secondary.length){
         attemptedPrimaryOnly=true;
         status.textContent="Retrying muscle image…";
-        img.src="/api/muscle-image?"+primaryOnlyParams.toString();
+        img.src=kinetosphereApiUrl("/api/muscle-image?")+primaryOnlyParams.toString();
         return;
       }
       img.classList.add("hidden");
       status.classList.remove("hidden");
       status.textContent="Muscle image unavailable.";
     };
-    img.src="/api/muscle-image?"+params.toString();
+    img.src=kinetosphereApiUrl("/api/muscle-image?")+params.toString();
   }catch(err){
     if(token!==rapidMuscleRenderToken) return;
     console.warn("Muscle image error",err);

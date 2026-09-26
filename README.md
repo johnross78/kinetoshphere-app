@@ -1,38 +1,20 @@
-# Kinetosphere Mobile v1.0 — Cloud Build Candidate
+# Kinetosphere iOS TestFlight RC4
 
-**iOS development package — do not deploy this ZIP to Cloudflare.**
+**Do not deploy this ZIP to Cloudflare.** It is the Git/Codemagic iOS development package.
 
-This package is synchronized with the stable Kinetosphere web baseline **v6.10.16** and is intended to become the first cloud-compiled iOS build.
+Baseline: web v6.10.16.
 
-## App identity
-- App name: Kinetosphere
-- Bundle ID: `com.kinetosphere.app`
-- Capacitor: 8.0.0 (pinned)
-- Shared client baseline: web v6.10.16
-- Web directory: `www`
+RC4 changes:
+- Fixes YouTube Error 153 on iOS/iPadOS by applying the Capacitor 8 main-WKWebView Referer patch from `@capgo/capacitor-youtube-player` v8.2.17 during `cap sync`.
+- Uses `https://circuitbuilder.rosshomegym.com` as the native YouTube client/referrer origin.
+- Routes native muscle image/API requests to the deployed Cloudflare origin while keeping relative API routes on web.
+- Adds a bundled muscle-group capability fallback if native CORS prevents reading `/api/muscle-groups`; image rendering still uses the live `/api/muscle-image` endpoint.
+- Adds `ITSAppUsesNonExemptEncryption=false` during the Codemagic iOS generation step.
+- Uses Codemagic integration reference `Kinetosphere App Store Connect`.
+- Fixes the TestFlight custom export JSON escaping.
+- Sets TestFlight build number to 2 for this RC, since build 1.0 (1) already exists in App Store Connect.
 
-## Cloud-build sequence
-1. Put this project in a Git repository.
-2. Connect that repository to Codemagic.
-3. Run `ios-simulator` first. This is an unsigned compile and does not need Apple signing.
-4. Fix any native compile issue until the Simulator workflow passes.
-5. Join the Apple Developer Program and create the Kinetosphere app record in App Store Connect if not already done.
-6. Create an App Store Connect API key with App Manager access and connect it in Codemagic using the integration name `Kinetosphere`.
-7. Run `ios-testflight` to create a signed IPA and submit it to TestFlight internal testing.
-8. Install the TestFlight build on iPhone and iPad and run the device QA checklist.
-
-## Current shared features
-- Build Circuit, Programs / Flows, Discover, Player, Settings
-- System / Light / Dark appearance
-- Responsive phone/iPad layouts
-- Provider storefront and entitlement model
-- Favorites and program completion state
-- Player timer and rep prescriptions
-- iPad-safe countdown audio cues independent of video mute
-- Licensed offline-media foundation and cache settings
-
-## Important
-The first cloud milestone is **successful iOS compilation**, not App Store release. Apple signing is intentionally kept out of the first compile so build-system issues can be diagnosed separately from certificate/provisioning issues.
-
-## Dependency note
-All Capacitor package versions are pinned in package.json. The cloud workflow uses npm install; the first cloud build should commit the generated package-lock.json back into the repository before subsequent release builds.
+Workflow:
+1. Replace/commit these files at the GitHub repository root.
+2. Run **Kinetosphere TestFlight Internal** in Codemagic.
+3. Test YouTube playback and muscle maps on both iPhone and iPad.

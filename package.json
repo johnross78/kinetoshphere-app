@@ -1,8 +1,8 @@
 {
   "name": "kinetosphere-mobile",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
-  "description": "Kinetosphere iOS/Android Capacitor release candidate synchronized with web v6.10.16.",
+  "description": "Kinetosphere iOS TestFlight RC4 synchronized with web v6.10.16; iOS YouTube Error 153 and native muscle-image routing fixes.",
   "scripts": {
     "cap:sync": "npx cap sync",
     "cap:add:ios": "npx cap add ios",
@@ -14,7 +14,8 @@
     "@capacitor/filesystem": "8.0.0",
     "@capacitor/haptics": "8.0.0",
     "@capacitor/network": "8.0.0",
-    "@capacitor/share": "8.0.0"
+    "@capacitor/share": "8.0.0",
+    "@capgo/capacitor-youtube-player": "8.2.17"
   },
   "devDependencies": {
     "@capacitor/cli": "8.0.0",
