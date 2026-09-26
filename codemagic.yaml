@@ -65,7 +65,7 @@ workflows:
           /usr/libexec/PlistBuddy -c "Set :ITSAppUsesNonExemptEncryption false" ios/App/App/Info.plist 2>/dev/null || \
             /usr/libexec/PlistBuddy -c "Add :ITSAppUsesNonExemptEncryption bool false" ios/App/App/Info.plist
           cd ios/App
-          agvtool new-version -all 6
+          agvtool new-version -all 7
           cd "$CM_BUILD_DIR"
       - name: Apply App Store provisioning profiles
         script: |

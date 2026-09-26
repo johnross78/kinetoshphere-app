@@ -1,4 +1,4 @@
-Kinetosphere iOS RC7 / TestFlight build 1.0 (6)
+Kinetosphere iOS RC8 / TestFlight build 1.0 (7)
 
 Hosted HTTPS YouTube bridge at https://circuitbuilder.rosshomegym.com/embed/youtube for inline iOS playback. Native YouTube plugin removed.
 
@@ -22,3 +22,6 @@ This is an iOS development package — do not deploy to Cloudflare.
 - Tapping Play Video initializes the plugin in native fullscreen/modal mode.
 - Web YouTube playback and Cloudflare Stream playback are unchanged.
 - TestFlight build number: 5.
+
+
+RC8: Fixes hosted YouTube bridge sizing on iOS by making #ytFrame and its bridge iframe fill the full 16:9 player surface. No Cloudflare redeploy required when v6.10.17 bridge is already live.
