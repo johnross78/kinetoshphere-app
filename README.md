@@ -14,3 +14,8 @@ Do not deploy this ZIP to Cloudflare. The Cloudflare web baseline remains v6.10.
 ## RC10 build pipeline cleanup
 - TestFlight build number is now derived automatically from the latest App Store Connect build and incremented by one.
 - Publishing now uploads to App Store Connect without automatically submitting to TestFlight beta review, avoiding unnecessary post-processing failures during internal testing.
+
+
+## RC12 — Smart Randomizer
+
+Synchronized with web v6.10.18. Builder Smart Randomize now uses canonical identity, canonical-family relationships, movement-family diversity, muscle-load overlap, and provider diversity while preserving current Builder filters as hard constraints. The established hosted-YouTube iOS bridge, muscle-map routing, iPad polish, app icon, and automatic TestFlight build numbering are retained.

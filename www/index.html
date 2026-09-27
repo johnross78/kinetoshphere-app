@@ -1271,7 +1271,7 @@ html[data-theme="light"] .provider-hero-media{background:rgba(23,32,42,.04)}
     <div>
       <div class="brand">
         <img class="brand-logo" id="brandLogo" src="assets/brand/orbit-lockup-dark.svg" alt="Kinetosphere" />
-        <span class="version-badge admin-only hidden" id="headerVersionBadge">v6.10.17</span>
+        <span class="version-badge admin-only hidden" id="headerVersionBadge">v6.10.18</span>
       </div>
       <div class="sub" id="subtitle"></div>
     </div>
@@ -1392,12 +1392,13 @@ html[data-theme="light"] .provider-hero-media{background:rgba(23,32,42,.04)}
         <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
           <h2 style="margin:0">Choose Exercises</h2>
           <div style="display:flex;align-items:center;gap:8px">
-            <button class="btn secondary" id="randomizeExercises">Randomize</button>
+            <button class="btn secondary" id="randomizeExercises" title="Build a balanced circuit while avoiding duplicate and biomechanically redundant movements">Smart Randomize</button>
             <input id="randomizeCount" type="number" min="1" max="20" step="1" value="5"
               aria-label="Number of exercises to randomize" style="width:72px;text-align:center">
           </div>
         </div>
-        <div class="architecture-note">Search includes provider names, canonical movement names, and relationship metadata. Circuits still store the provider exercise you choose.</div>
+        <div class="architecture-note">Smart Randomize uses canonical exercise identity, movement families, muscle overlap, and provider diversity to reduce duplicate or biomechanically repetitive selections. Current filters remain hard constraints.</div>
+        <div class="meta" id="smartRandomizerStatus" style="margin:8px 0 0"></div>
         <div class="picker-search-row">
           <div aria-hidden="true" style="position:absolute;width:1px;height:1px;overflow:hidden;left:-10000px;top:auto">
             <input type="text" name="username" tabindex="-1" autocomplete="username" aria-hidden="true">
@@ -1614,7 +1615,7 @@ html[data-theme="light"] .provider-hero-media{background:rgba(23,32,42,.04)}
   <section id="profileView" class="hidden"><div class="panel"><h2>Profile</h2><div class="meta">Profile identity, avatar, bio, and future social visibility controls will live here.</div></div></section>
   <section id="billingView" class="hidden"><div class="panel"><h2>Billing</h2><div class="meta">Kinetosphere subscription and provider-access billing controls will live here.</div></div></section>
   <section id="supportView" class="hidden"><div class="panel"><h2>Support</h2><div class="meta">Help, feedback, provider-access troubleshooting, and support requests will live here.</div></div></section>
-  <section id="aboutView" class="hidden"><div class="panel"><h2>About Kinetosphere</h2><div class="meta" style="margin-bottom:12px">Kinetosphere brings circuit building, provider programs, workout playback, and connected training libraries into one experience.</div><div class="notice"><strong>Current version:</strong> v6.10.17</div></div></section>
+  <section id="aboutView" class="hidden"><div class="panel"><h2>About Kinetosphere</h2><div class="meta" style="margin-bottom:12px">Kinetosphere brings circuit building, provider programs, workout playback, and connected training libraries into one experience.</div><div class="notice"><strong>Current version:</strong> v6.10.18</div></div></section>
 
   <section id="importerView" class="hidden">
     <div class="panel">
@@ -4000,6 +4001,82 @@ function addToCircuit(id){
   renderCircuit();
 }
 
+function smartRandomizerTokens(values){
+  return new Set((Array.isArray(values)?values:[values]).flatMap(v=>String(v||"").toLowerCase().split(/[^a-z0-9]+/)).filter(Boolean));
+}
+function smartRandomizerMovementFamily(ex){
+  const name=`${cleanedExerciseName(ex)} ${(ex?.movementSubtypes||[]).join(" ")} ${ex?.movementTypeV2||""} ${ex?.category||""}`.toLowerCase();
+  const tests=[
+    ["squat",/squat|thruster|wall ball/],
+    ["hinge",/deadlift|hinge|good morning|swing|hip extension|rdl/],
+    ["lunge",/lunge|split squat|step.?up|step.?down/],
+    ["horizontal-push",/push.?up|bench press|chest press|floor press/],
+    ["vertical-push",/overhead press|shoulder press|push press|jerk|handstand push/],
+    ["horizontal-pull",/\brow\b|rower|inverted row|ring row/],
+    ["vertical-pull",/pull.?up|chin.?up|lat pull|rope climb/],
+    ["carry",/carry|farmer|suitcase|rack walk/],
+    ["rotation",/rotation|rotate|woodchop|pallof|twist/],
+    ["core",/plank|hollow|sit.?up|crunch|dead bug|bird dog|anti.?rotation/],
+    ["locomotion",/crawl|bear walk|crab walk|inch.?worm/],
+    ["jump",/jump|hop|bound|box jump|broad jump/],
+    ["cardio",/run|sprint|rowerg|ski.?erg|bike|burpee|jump rope/],
+    ["mobility",/mobility|stretch|floss|cars?\b|release|foam roll/]
+  ];
+  for(const [label,re] of tests) if(re.test(name)) return label;
+  const fallback=String(ex?.movementTypeV2||ex?.category||ex?.subcategory||"other").trim().toLowerCase().replace(/[^a-z0-9]+/g,"-");
+  return fallback||"other";
+}
+function smartRandomizerProfile(ex){
+  const model=canonicalModel(ex);
+  const familyCanonical=model.parentCanonicalExerciseId||model.canonicalExerciseId||fallbackCanonicalIdFromName(cleanedExerciseName(ex));
+  return {
+    ex,
+    canonical:model.canonicalExerciseId||familyCanonical,
+    canonicalFamily:familyCanonical,
+    movementFamily:smartRandomizerMovementFamily(ex),
+    muscles:new Set(exerciseMuscleGroups(ex).map(x=>String(x).toLowerCase())),
+    provider:providerForExercise(ex).id||primarySource(ex),
+    equipment:smartRandomizerTokens(exerciseEquipmentTags(ex))
+  };
+}
+function smartRandomizerOverlap(a,b){
+  if(!a.size||!b.size) return 0;
+  let common=0;
+  a.forEach(v=>{if(b.has(v)) common++;});
+  return common/Math.max(1,Math.min(a.size,b.size));
+}
+function smartRandomizerCandidateScore(candidate, selected, usage){
+  let score=Math.random()*7;
+  const recent=selected.slice(-2);
+  if(selected.some(s=>s.canonical===candidate.canonical)) score-=1000;
+  if(selected.some(s=>s.canonicalFamily===candidate.canonicalFamily)) score-=240;
+  if(selected.some(s=>s.movementFamily===candidate.movementFamily)) score-=70;
+  if(recent.some(s=>smartRandomizerOverlap(s.muscles,candidate.muscles)>=0.67)) score-=90;
+  if(recent.some(s=>smartRandomizerOverlap(s.muscles,candidate.muscles)>=0.5)) score-=35;
+  let musclePenalty=0;
+  candidate.muscles.forEach(m=>{musclePenalty+=(usage.muscles.get(m)||0)*12;});
+  score-=musclePenalty;
+  score-=(usage.families.get(candidate.movementFamily)||0)*28;
+  score-=(usage.providers.get(candidate.provider)||0)*3;
+  if(!usage.providers.has(candidate.provider)) score+=8;
+  return score;
+}
+function smartRandomizeRows(rows,count){
+  const pool=rows.map(smartRandomizerProfile);
+  const selected=[];
+  const usage={muscles:new Map(),families:new Map(),providers:new Map()};
+  while(selected.length<Math.min(count,pool.length)){
+    const remaining=pool.filter(c=>!selected.includes(c));
+    if(!remaining.length) break;
+    remaining.sort((a,b)=>smartRandomizerCandidateScore(b,selected,usage)-smartRandomizerCandidateScore(a,selected,usage));
+    const pick=remaining[0];
+    selected.push(pick);
+    pick.muscles.forEach(m=>usage.muscles.set(m,(usage.muscles.get(m)||0)+1));
+    usage.families.set(pick.movementFamily,(usage.families.get(pick.movementFamily)||0)+1);
+    usage.providers.set(pick.provider,(usage.providers.get(pick.provider)||0)+1);
+  }
+  return selected.map(x=>x.ex);
+}
 function randomizeCurrentFilteredExercises(){
   const input=el("randomizeCount");
   let count=parseInt(input.value,10);
@@ -4007,7 +4084,7 @@ function randomizeCurrentFilteredExercises(){
   count=Math.min(20,count);
   input.value=String(count);
 
-  // Use the exact same filtered result set currently shown under Choose Exercises.
+  // Current Builder filters are hard constraints for Smart Randomize.
   const rows=filteredExercises(
     selectedBuilderFilters("category"),
     selectedBuilderFilters("subcategory"),
@@ -4024,19 +4101,9 @@ function randomizeCurrentFilteredExercises(){
     return;
   }
 
-  // Randomize is a replacement action: clear Current Circuit first,
-  // then populate it from the currently filtered exercise set.
   workingCircuit=[];
   workingProgramContext=null;
-
-  // Fisher-Yates shuffle, then take the requested number.
-  const shuffled=rows.slice();
-  for(let i=shuffled.length-1;i>0;i--){
-    const j=Math.floor(Math.random()*(i+1));
-    [shuffled[i],shuffled[j]]=[shuffled[j],shuffled[i]];
-  }
-
-  const selected=shuffled.slice(0,Math.min(count,shuffled.length));
+  const selected=smartRandomizeRows(rows,count);
 
   selected.forEach(ex=>{
     const prescription=inferDefaultPrescription(ex);
@@ -4050,6 +4117,12 @@ function randomizeCurrentFilteredExercises(){
     });
   });
 
+  const status=el("smartRandomizerStatus");
+  if(status){
+    const providers=new Set(selected.map(ex=>providerForExercise(ex).name)).size;
+    const families=new Set(selected.map(ex=>smartRandomizerMovementFamily(ex))).size;
+    status.textContent=`Smart circuit created: ${selected.length} movement${selected.length===1?"":"s"} · ${families} movement famil${families===1?"y":"ies"} · ${providers} provider${providers===1?"":"s"}. Filters were preserved.`;
+  }
   renderCircuit();
 }
 
