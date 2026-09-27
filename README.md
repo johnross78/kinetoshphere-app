@@ -9,3 +9,8 @@ Synchronized with web v6.10.17. This iOS-only refinement keeps the working hoste
 TestFlight build number: 8.
 
 Do not deploy this ZIP to Cloudflare. The Cloudflare web baseline remains v6.10.17.
+
+
+## RC10 build pipeline cleanup
+- TestFlight build number is now derived automatically from the latest App Store Connect build and incremented by one.
+- Publishing now uploads to App Store Connect without automatically submitting to TestFlight beta review, avoiding unnecessary post-processing failures during internal testing.
