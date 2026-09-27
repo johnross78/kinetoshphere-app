@@ -103,9 +103,9 @@ workflows:
           JSON
           /usr/libexec/PlistBuddy -c "Set :ITSAppUsesNonExemptEncryption false" ios/App/App/Info.plist 2>/dev/null || \
             /usr/libexec/PlistBuddy -c "Add :ITSAppUsesNonExemptEncryption bool false" ios/App/App/Info.plist
-          LATEST_BUILD_NUMBER=$(app-store-connect get-latest-app-store-build-number "$APP_STORE_APPLE_ID")
+          LATEST_BUILD_NUMBER=$(app-store-connect get-latest-testflight-build-number "$APP_STORE_APPLE_ID")
           NEXT_BUILD_NUMBER=$((LATEST_BUILD_NUMBER + 1))
-          echo "Latest App Store Connect build: $LATEST_BUILD_NUMBER"
+          echo "Latest TestFlight build: $LATEST_BUILD_NUMBER"
           echo "Using build number: $NEXT_BUILD_NUMBER"
           cd ios/App
           agvtool new-version -all "$NEXT_BUILD_NUMBER"
