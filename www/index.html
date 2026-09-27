@@ -1285,6 +1285,18 @@ html[data-theme="light"] .provider-hero-media{background:rgba(23,32,42,.04)}
   #playerView .prescription-timer-row{position:relative;z-index:1}
   #playerView .timer-action-row{position:relative;z-index:1}
 }
+
+/* v6.10.21 Player lifecycle, provider-grouped programs, matched Player cards */
+@media (min-width:760px){
+  #playerArea .workout-shell{align-items:flex-start}
+  #playerArea .video-card{aspect-ratio:16/9;height:auto;align-self:flex-start}
+  #playerArea .video-card .video-wrap{height:100%;aspect-ratio:auto}
+  #playerArea .info-card{overflow-y:auto;overscroll-behavior:contain}
+}
+.program-provider-section{margin:0 0 22px}
+.program-provider-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 10px;padding:0 2px}
+.program-provider-heading h3{margin:0;font-size:20px}
+.program-provider-count{font-size:12px;font-weight:800;color:var(--muted);background:var(--panel2);border:1px solid var(--border);border-radius:999px;padding:4px 8px}
 </style>
 <link rel="stylesheet" href="mobile-shell.css" />
 </head>
@@ -1296,7 +1308,7 @@ html[data-theme="light"] .provider-hero-media{background:rgba(23,32,42,.04)}
     <div>
       <div class="brand">
         <img class="brand-logo" id="brandLogo" src="assets/brand/orbit-lockup-dark.svg" alt="Kinetosphere" />
-        <span class="version-badge admin-only hidden" id="headerVersionBadge">v6.10.20</span>
+        <span class="version-badge admin-only hidden" id="headerVersionBadge">v6.10.21</span>
       </div>
       <div class="sub" id="subtitle"></div>
     </div>
@@ -1659,7 +1671,7 @@ html[data-theme="light"] .provider-hero-media{background:rgba(23,32,42,.04)}
   <section id="profileView" class="hidden"><div class="panel"><h2>Profile</h2><div class="meta">Profile identity, avatar, bio, and future social visibility controls will live here.</div></div></section>
   <section id="billingView" class="hidden"><div class="panel"><h2>Billing</h2><div class="meta">Kinetosphere subscription and provider-access billing controls will live here.</div></div></section>
   <section id="supportView" class="hidden"><div class="panel"><h2>Support</h2><div class="meta">Help, feedback, provider-access troubleshooting, and support requests will live here.</div></div></section>
-  <section id="aboutView" class="hidden"><div class="panel"><h2>About Kinetosphere</h2><div class="meta" style="margin-bottom:12px">Kinetosphere brings circuit building, provider programs, workout playback, and connected training libraries into one experience.</div><div class="notice"><strong>Current version:</strong> v6.10.20</div></div></section>
+  <section id="aboutView" class="hidden"><div class="panel"><h2>About Kinetosphere</h2><div class="meta" style="margin-bottom:12px">Kinetosphere brings circuit building, provider programs, workout playback, and connected training libraries into one experience.</div><div class="notice"><strong>Current version:</strong> v6.10.21</div></div></section>
 
   <section id="importerView" class="hidden">
     <div class="panel">
@@ -4497,22 +4509,23 @@ function renderPrograms(){
   grid.innerHTML="";
   if(!rows.length){ grid.innerHTML='<div class="program-empty-state">No programs match these filters.</div>'; return; }
   const grouped=new Map();
-  rows.forEach(p=>{ if(!grouped.has(p.programType||"Programs")) grouped.set(p.programType||"Programs",[]); grouped.get(p.programType||"Programs").push(p); });
-  const types=[...grouped.keys()].sort((a,b)=>{
-    const ai=PROGRAM_TYPE_ORDER.indexOf(a), bi=PROGRAM_TYPE_ORDER.indexOf(b);
-    if(ai<0&&bi<0) return a.localeCompare(b);
-    if(ai<0) return 1; if(bi<0) return -1; return ai-bi;
-  });
-  types.forEach(groupType=>{
-    const section=document.createElement("section"); section.className="program-type-section";
-    const items=grouped.get(groupType).slice().sort((a,b)=>{
-      if(a.seriesName&&b.seriesName&&a.seriesName===b.seriesName){
+  rows.forEach(p=>{ const provider=p.source||"Unknown Provider"; if(!grouped.has(provider)) grouped.set(provider,[]); grouped.get(provider).push(p); });
+  const providers=[...grouped.keys()].sort((a,b)=>a.localeCompare(b));
+  providers.forEach(providerName=>{
+    const section=document.createElement("section"); section.className="program-provider-section";
+    const items=grouped.get(providerName).slice().sort((a,b)=>{
+      const as=String(a.seriesName||"").trim(), bs=String(b.seriesName||"").trim();
+      if(as && bs && as===bs){
         const ao=Number(a.seriesOrder), bo=Number(b.seriesOrder);
-        if(Number.isFinite(ao)&&Number.isFinite(bo)) return ao-bo;
+        if(Number.isFinite(ao)&&Number.isFinite(bo) && ao!==bo) return ao-bo;
+        return a.name.localeCompare(b.name);
       }
+      if(as && bs) return as.localeCompare(bs) || a.name.localeCompare(b.name);
+      if(as) return -1;
+      if(bs) return 1;
       return a.name.localeCompare(b.name);
     });
-    section.innerHTML=`<div class="program-type-heading"><h3>${escapeHtml(groupType)}</h3><span class="program-type-count">${items.length}</span></div><div class="program-grid"></div>`;
+    section.innerHTML=`<div class="program-provider-heading"><h3>${escapeHtml(providerName)}</h3><span class="program-provider-count">${items.length}</span></div><div class="program-grid"></div>`;
     const sectionGrid=section.querySelector(".program-grid");
     items.forEach(program=>{
       const count=programOccurrencesFor(program.id).length;
@@ -4520,7 +4533,7 @@ function renderPrograms(){
       const series=program.seriesName?`<div class="program-series-line">Series: ${escapeHtml(program.seriesName)}${program.seriesOrder?` · ${escapeHtml(String(program.seriesOrder))}`:""}</div>`:"";
       card.innerHTML=`<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px"><h3>${escapeHtml(program.name)}</h3><div class="program-status-actions"><button class="favorite-btn ${isFavoriteProgram(program.id)?"is-favorite":""}" type="button" data-program-favorite="${program.id}" aria-label="${isFavoriteProgram(program.id)?"Remove program from favorites":"Add program to favorites"}" title="${isFavoriteProgram(program.id)?"Remove from favorites":"Add to favorites"}">${isFavoriteProgram(program.id)?"♥":"♡"}</button><button class="program-complete-btn ${isCompletedProgram(program.id)?"is-complete":""}" type="button" data-program-complete="${program.id}" aria-label="${isCompletedProgram(program.id)?"Mark program not completed":"Mark program completed"}" title="${isCompletedProgram(program.id)?"Completed — click to clear":"Mark completed"}">✓</button></div></div>
         ${series}
-        <div class="program-card-meta"><span class="program-pill">${escapeHtml(program.source||"Unknown Provider")}</span><span class="program-pill">${escapeHtml(program.difficulty||"—")}</span><span class="program-pill">${escapeHtml(program.primaryPurpose||"General")}</span><span class="program-pill">${count} movements</span>${program.frequency?`<span class="program-pill">${escapeHtml(String(program.frequency))}</span>`:""}</div>
+        <div class="program-card-meta"><span class="program-pill">${escapeHtml(program.programType||"Program")}</span><span class="program-pill">${escapeHtml(program.difficulty||"—")}</span><span class="program-pill">${escapeHtml(program.primaryPurpose||"General")}</span><span class="program-pill">${count} movements</span>${program.frequency?`<span class="program-pill">${escapeHtml(String(program.frequency))}</span>`:""}</div>
         <div class="program-card-description">${escapeHtml(programBrowseDescription(program))}</div>
         <div class="program-card-actions"><button class="btn good" data-program-launch="${program.id}">Launch Program</button><button class="btn primary" data-program-load="${program.id}">Customize in Builder</button><button class="btn secondary" data-program-preview="${program.id}">Preview Movements</button></div>
         <div class="program-preview hidden" id="program-preview-${program.id}">${programPreviewHtml(program)}</div>`;
@@ -5698,6 +5711,8 @@ function initMobileShellControls(){
 }
 
 function showView(name){
+  const playerWasVisible=el("playerView") && !el("playerView").classList.contains("hidden");
+  if(playerWasVisible && name!=="player") teardownPlayerRuntime({stopTimers:true});
   if(name==="importer" && !isAdminUser()){
     name="account";
   }
@@ -5731,6 +5746,7 @@ function showView(name){
     el("roundComplete").style.display="none";
     el("playerArea").style.display="block";
     renderPlayer();
+    syncPlayerCardHeights();
   }
 }
 
@@ -6125,7 +6141,45 @@ function stopAllMovementVideo(){
   const yt=el("ytFrame");
   if(yt) yt.classList.remove("hidden");
   if(ytPlayerReady && ytPlayer){ try{ ytPlayer.stopVideo(); }catch(e){} }
+  pendingVideoId=null;
+  initialVideoLoaded=false;
+  if(ytRetryTimer){ clearTimeout(ytRetryTimer); ytRetryTimer=null; }
   activeVideoProvider="";
+}
+function stopCountdownCuePlayback(){
+  [countdownArmAudio,countdownFallbackAudio,countdownFinalFallbackAudio].forEach(audio=>{
+    if(!audio) return;
+    try{ audio.pause(); audio.currentTime=0; }catch(e){}
+  });
+}
+function teardownPlayerRuntime({stopTimers=true}={}){
+  stopAllMovementVideo();
+  stopCountdownCuePlayback();
+  if(stopTimers){
+    stopTimer();
+    stopSetRestTimer();
+    stopRoundRestTimer();
+  }
+}
+let playerCardResizeObserver=null;
+function syncPlayerCardHeights(){
+  const video=el("playerArea")?.querySelector(".video-card");
+  const info=el("infoCard");
+  if(!video||!info) return;
+  if(window.innerWidth<760){ info.style.height=""; info.style.maxHeight=""; return; }
+  requestAnimationFrame(()=>{
+    const h=Math.round(video.getBoundingClientRect().height);
+    if(h>0){ info.style.height=`${h}px`; info.style.maxHeight=`${h}px`; }
+  });
+}
+function initPlayerCardHeightSync(){
+  const video=el("playerArea")?.querySelector(".video-card");
+  if(!video || typeof ResizeObserver==="undefined") return;
+  if(playerCardResizeObserver) playerCardResizeObserver.disconnect();
+  playerCardResizeObserver=new ResizeObserver(()=>syncPlayerCardHeights());
+  playerCardResizeObserver.observe(video);
+  window.addEventListener("resize",syncPlayerCardHeights,{passive:true});
+  syncPlayerCardHeights();
 }
 
 
@@ -6377,6 +6431,7 @@ function renderPlayer(){
     playerDisplay.textContent=executionPrefix?`${executionPrefix} · ${visiblePrescription}`:visiblePrescription;
   }
   renderPlayerList(items);
+  syncPlayerCardHeights();
 }
 function renderPlayerList(items){
   const list=el("exerciseList");list.innerHTML="";
@@ -6385,12 +6440,12 @@ function renderPlayerList(items){
     const activeMeta=i===currentExercise?programExecutionPrefix():"";
     const rx=roundSpecificPrescription(ex.prescription,currentRound);
     d.innerHTML=`<div class="exercise-name">${i+1}. ${cleanedExerciseName(ex)}</div><div class="exercise-meta">${activeMeta?escapeHtml(activeMeta)+" · ":""}${escapeHtml(rx)}</div>`;
-    d.onclick=()=>{stopTimer();currentExercise=i;programCurrentSet=1;renderPlayer();};list.appendChild(d);
+    d.onclick=()=>{stopTimer();stopAllMovementVideo();currentExercise=i;programCurrentSet=1;renderPlayer();};list.appendChild(d);
   });
 }
 function next(){
   if(programIntroPending){finishProgramIntro();return;}
-  const items=getActiveItems();if(!items.length)return;stopTimer();
+  const items=getActiveItems();if(!items.length)return;stopTimer();stopAllMovementVideo();
   const behavior=activeProgramBehavior();
 
   // Paired / alternating set programs: complete one pass through the pair,
@@ -6425,13 +6480,13 @@ function next(){
 }
 function prev(){
   if(programIntroPending)return;
-  if(currentExercise>0){stopTimer();currentExercise--;programCurrentSet=1;renderPlayer();return;}
+  if(currentExercise>0){stopTimer();stopAllMovementVideo();currentExercise--;programCurrentSet=1;renderPlayer();return;}
   const behavior=activeProgramBehavior();
   if((behavior==="complete_flow_one_side_then_switch" || behavior==="complete_flow_one_kneeling_side_then_switch") && programFlowSide===1){
     stopTimer();programFlowSide=0;currentExercise=Math.max(0,getActiveItems().length-1);programCurrentSet=1;renderPlayer();
   }
 }
-function restartRound(){stopTimer();stopSetRestTimer();currentExercise=0;resetProgramExecutionState();initialVideoLoaded=false;renderPlayer();}
+function restartRound(){teardownPlayerRuntime({stopTimers:true});currentExercise=0;resetProgramExecutionState();initialVideoLoaded=false;renderPlayer();}
 function stopSetRestTimer(){
   if(setRestHandle){clearInterval(setRestHandle);setRestHandle=null;}
 }
@@ -6473,9 +6528,7 @@ function showSetRest(seconds,continuation,label="NEXT SET"){
   return true;
 }
 function showRoundComplete(){
-  stopTimer();
-  stopSetRestTimer();
-  stopRoundRestTimer();
+  teardownPlayerRuntime({stopTimers:true});
   el("playerArea").style.display="none";el("roundComplete").style.display="block";
   if(currentRound<activeCircuit.rounds){
     el("roundTitle").textContent=`ROUND ${currentRound} COMPLETE`;
@@ -7374,6 +7427,8 @@ async function init(){
 }
 
 
+initPlayerCardHeightSync();
+
 if(el("providerDetailBack")) el("providerDetailBack").onclick=()=>showView("discover");
 if(el("discoverSearch")) el("discoverSearch").oninput=e=>{ discoverSearchQuery=e.target.value||""; renderProviderAccessUI(); };
 if(el("discoverAccessFilter")) el("discoverAccessFilter").onchange=e=>{ discoverAccessFilter=e.target.value||""; renderProviderAccessUI(); };
@@ -7388,6 +7443,8 @@ if(el("previewProviderStorefront")) el("previewProviderStorefront").onclick=()=>
 
 document.addEventListener("pointerdown",ensureCountdownAudio,{passive:true});
 document.addEventListener("keydown",ensureCountdownAudio,{passive:true});
+document.addEventListener("visibilitychange",()=>{ if(document.hidden) teardownPlayerRuntime({stopTimers:true}); });
+window.addEventListener("pagehide",()=>teardownPlayerRuntime({stopTimers:true}),{passive:true});
 document.querySelectorAll(".tab[data-view]").forEach(t=>t.onclick=()=>{
   startupNavigationPending=false;
   if(el("settingsMenu")) el("settingsMenu").classList.add("hidden");
