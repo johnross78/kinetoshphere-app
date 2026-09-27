@@ -43,3 +43,10 @@ Synchronized with web v6.10.18. Builder Smart Randomize now uses canonical ident
 - Saved Circuits explains when Guest mode prevents account-synced circuits from appearing.
 - Smart Randomizer Preferences remain persistent and account-synced.
 - Admin Media Health queue reads the new Supabase media_health_issues table.
+
+## RC17 — Native layout regression recovery
+- Synced with web v6.10.23.
+- Restores native iOS safe-area header clearance across iPhone and iPad.
+- Restores full-frame sizing for the hosted HTTPS YouTube bridge.
+- Mobile Player tab now prepares the current Builder circuit automatically, matching web/iPad behavior.
+- Adds viewport-height-aware iPad landscape Player geometry while keeping the video as the height authority.
