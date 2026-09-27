@@ -117,8 +117,15 @@
   .mobile-nav-btn.active{background:var(--surface-soft)}
 }
 
-
-/* RC9 native iPad chrome clearance. Phone safe-area rules above remain authoritative. */
-@media (min-width:761px){
-  html.native-capacitor-shell .global-sync-badge{top:calc(20px + env(safe-area-inset-top));}
+/* v6.10.19 Builder priority, Settings nav, and Player emphasis */
+@media (max-width:760px){
+  #builderView .builder-grid{display:flex!important;flex-direction:column}
+  #builderView .builder-grid > .panel:first-child{order:2}
+  #builderView .builder-grid > div:nth-child(2){order:1}
+  .saved-circuits-mobile-toggle{display:inline-flex}
+  #savedCircuitsMobileBody.mobile-collapsed{display:none}
+  .smart-pref-grid{grid-template-columns:1fr!important}
+  .mobile-nav-btn.player-nav{background:#f2c94c;color:#211700}
+  .mobile-nav-btn.player-nav.active{background:#f2c94c;color:#211700;box-shadow:0 0 0 2px rgba(255,255,255,.18) inset}
+  .mobile-nav-btn.player-nav .mobile-nav-icon{font-size:20px}
 }

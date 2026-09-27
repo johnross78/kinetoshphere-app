@@ -1,8 +1,8 @@
 {
   "name": "kinetosphere-mobile",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "private": true,
-  "description": "Kinetosphere iOS TestFlight RC9 / build 8: balanced Player cards, iPad safe-area header spacing, and final orbit app icon; synchronized with web v6.10.17.",
+  "description": "Kinetosphere iOS RC13: Smart Randomizer preferences, touch circuit reordering, mobile Builder priority, yellow Player navigation, and Builder card cleanup; synchronized with web v6.10.19.",
   "scripts": {
     "cap:sync": "npx cap sync",
     "cap:add:ios": "npx cap add ios",

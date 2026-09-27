@@ -3,11 +3,6 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<script>
-try {
-  if (!/^https?:$/.test(window.location.protocol)) document.documentElement.classList.add('native-capacitor-shell');
-} catch (e) {}
-</script>
 <title>Kinetosphere</title>
 <link rel="icon" href="assets/brand/orbit-app-icon.svg" type="image/svg+xml" />
 <script>
@@ -754,14 +749,7 @@ button[data-delete-saved]:hover{background:#e8b5b5 !important;}
 #offlineVideoFrame{width:100%;height:100%;border:0;display:block;background:#000;object-fit:contain;}
 #offlineVideoFrame.hidden{display:none;}
 #streamFrame.hidden{display:none;}
-#ytFrame{width:100%;height:100%;position:relative;background:#000;}
-#ytFrame > iframe[data-kinetosphere-youtube-bridge]{position:absolute;inset:0;width:100%;height:100%;display:block;border:0;}
 #ytFrame.hidden{display:none!important;}
-.native-youtube-placeholder{width:100%;height:100%;min-height:220px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:24px;text-align:center;background:radial-gradient(circle at center,rgba(255,255,255,.055),rgba(0,0,0,.18));}
-.native-youtube-mark{font-size:46px;line-height:1;color:#fff;opacity:.94;}
-.native-youtube-copy{display:flex;flex-direction:column;gap:4px;color:#fff;}
-.native-youtube-copy span{font-size:12px;color:#aeb8c3;}
-.native-youtube-play{min-width:150px;margin-top:4px;}
 
 .player-secondary-actions{
   display:grid;
@@ -862,13 +850,6 @@ button[data-delete-saved]:hover{background:#e8b5b5 !important;}
 .player-progress-footer .metric .small{font-size:10px}
 .player-header-stack{min-width:0}
 @media(max-width:900px){.player-progress-footer{margin-top:9px}}
-
-/* iOS RC9 / TestFlight 1.0 (8): iPad shell + balanced Player columns */
-@media (min-width:761px){
-  html.native-capacitor-shell .app{padding-top:calc(26px + env(safe-area-inset-top));}
-}
-#playerView .workout-shell{align-items:stretch;}
-#playerView .video-card,#playerView .info-card{align-self:stretch;}
 
 /* v6.5.15 Movement Details readability */
 #modalBody{
@@ -1260,6 +1241,23 @@ html[data-theme="light"] .provider-hero-media{background:rgba(23,32,42,.04)}
   }
 }
 
+
+/* v6.10.19 Builder usability + Smart Randomizer controls */
+.tab.player-tab{background:#f2c94c;color:#211700;box-shadow:0 0 0 1px rgba(0,0,0,.08) inset}
+.tab.player-tab:hover{filter:brightness(1.04)}
+#launchCircuit{background:#f2c94c;color:#211700}
+.tab.player-tab.active{background:#f2c94c;color:#211700;box-shadow:0 0 0 2px rgba(255,255,255,.18) inset}
+.circuit-item.touch-drag-target{outline:2px solid var(--accent);outline-offset:2px}
+.drag-handle{touch-action:none;-webkit-user-select:none;user-select:none}
+.saved-circuits-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.saved-circuits-mobile-toggle{display:none}
+.smart-pref-toggle-row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px;border:1px solid var(--border);border-radius:12px;background:var(--surface-faint);margin-bottom:12px}
+.smart-pref-switch{margin:0;flex:0 0 auto}
+.smart-pref-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.smart-pref-control{padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:var(--surface-fainter)}
+.smart-pref-control label{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-top:0}
+.smart-pref-value{color:var(--accent);text-transform:none;letter-spacing:0}
+.smart-pref-control input[type=range]{padding:0;background:transparent;border:0;min-height:28px}
 </style>
 <link rel="stylesheet" href="mobile-shell.css" />
 </head>
@@ -1271,15 +1269,15 @@ html[data-theme="light"] .provider-hero-media{background:rgba(23,32,42,.04)}
     <div>
       <div class="brand">
         <img class="brand-logo" id="brandLogo" src="assets/brand/orbit-lockup-dark.svg" alt="Kinetosphere" />
-        <span class="version-badge admin-only hidden" id="headerVersionBadge">v6.10.18</span>
+        <span class="version-badge admin-only hidden" id="headerVersionBadge">v6.10.19</span>
       </div>
       <div class="sub" id="subtitle"></div>
     </div>
     <div class="tabs">
       <button class="tab active" data-view="builder">Build Circuit</button>
       <button class="tab" data-view="programs">Programs / Flows</button>
+      <button class="tab player-tab" data-view="player">Player</button>
       <button class="tab" data-view="discover">Discover</button>
-      <button class="tab" data-view="player">Player</button>
       <div class="settings-menu">
         <button class="tab settings-trigger" id="settingsMenuBtn" type="button" aria-haspopup="true" aria-expanded="false">Settings ▾</button>
         <div class="settings-dropdown hidden" id="settingsMenu">
@@ -1301,9 +1299,9 @@ html[data-theme="light"] .provider-hero-media{background:rgba(23,32,42,.04)}
   <nav class="mobile-bottom-nav" id="mobileBottomNav" aria-label="Primary navigation">
     <button type="button" class="mobile-nav-btn active" data-mobile-view="builder"><span class="mobile-nav-icon">＋</span><span>Build</span></button>
     <button type="button" class="mobile-nav-btn" data-mobile-view="programs"><span class="mobile-nav-icon">▦</span><span>Programs</span></button>
+    <button type="button" class="mobile-nav-btn player-nav" data-mobile-view="player"><span class="mobile-nav-icon">▶</span><span>Player</span></button>
     <button type="button" class="mobile-nav-btn" data-mobile-view="discover"><span class="mobile-nav-icon">⌕</span><span>Discover</span></button>
-    <button type="button" class="mobile-nav-btn" data-mobile-view="player"><span class="mobile-nav-icon">▶</span><span>Player</span></button>
-    <button type="button" class="mobile-nav-btn" id="mobileMoreBtn"><span class="mobile-nav-icon">•••</span><span>More</span></button>
+    <button type="button" class="mobile-nav-btn" data-mobile-view="preferences"><span class="mobile-nav-icon">⚙</span><span>Settings</span></button>
   </nav>
 
   <section id="libraryView" class="hidden">
@@ -1397,7 +1395,7 @@ html[data-theme="light"] .provider-hero-media{background:rgba(23,32,42,.04)}
               aria-label="Number of exercises to randomize" style="width:72px;text-align:center">
           </div>
         </div>
-        <div class="architecture-note">Smart Randomize uses canonical exercise identity, movement families, muscle overlap, and provider diversity to reduce duplicate or biomechanically repetitive selections. Current filters remain hard constraints.</div>
+        <div class="architecture-note">Smart Randomize prioritizes exercise identity and movement-family variety while preserving your filters. Muscle concentration is allowed by default, so targeted sessions stay targeted. Adjust Smart Randomizer behavior in Settings → Preferences.</div>
         <div class="meta" id="smartRandomizerStatus" style="margin:8px 0 0"></div>
         <div class="picker-search-row">
           <div aria-hidden="true" style="position:absolute;width:1px;height:1px;overflow:hidden;left:-10000px;top:auto">
@@ -1449,7 +1447,7 @@ html[data-theme="light"] .provider-hero-media{background:rgba(23,32,42,.04)}
           <div class="current-circuit-meta-row">
             <div class="current-circuit-name-field">
               <label for="circuitName">Circuit Name <span class="circuit-name-save-note">(ENTER NAME IF YOU PLAN TO SAVE FOR FUTURE USE)</span></label>
-              <input id="circuitName" value="" autocomplete="off">
+              <input id="circuitName" value="Current Circuit" placeholder="Current Circuit" autocomplete="off">
             </div>
             <div class="current-circuit-rounds-stack">
               <div class="rounds-label-row">
@@ -1492,7 +1490,7 @@ html[data-theme="light"] .provider-hero-media{background:rgba(23,32,42,.04)}
               </div>
             </div>
           </div>
-          <div class="meta" style="margin-bottom:10px">Drag by the ☰ handle to reorder on browser, or use ↑ / ↓ to reorder on devices.</div>
+          <div class="meta" style="margin-bottom:10px">Drag the ☰ handle to reorder with mouse or touch, or use ↑ / ↓ for precise moves.</div>
           <div class="circuit-list" id="circuitList"></div>
           <div class="actions">
             <button class="btn good" id="saveCircuit">Save Circuit</button>
@@ -1501,10 +1499,15 @@ html[data-theme="light"] .provider-hero-media{background:rgba(23,32,42,.04)}
           </div>
         </div>
 
-        <div class="panel">
-          <h2>Saved Circuits</h2>
-          <div class="meta" style="margin-bottom:10px">Load a saved circuit into the builder, or launch it immediately.</div>
-          <div class="list" id="savedCircuitsList" style="max-height:250px"></div>
+        <div class="panel saved-circuits-panel">
+          <div class="saved-circuits-heading">
+            <h2 style="margin:0">Saved Circuits</h2>
+            <button class="btn secondary saved-circuits-mobile-toggle" id="toggleSavedCircuitsMobile" type="button" aria-expanded="true">Collapse ▴</button>
+          </div>
+          <div id="savedCircuitsMobileBody">
+            <div class="meta" style="margin-bottom:10px">Load a saved circuit into the builder, or launch it immediately.</div>
+            <div class="list" id="savedCircuitsList" style="max-height:250px"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -1602,6 +1605,19 @@ html[data-theme="light"] .provider-hero-media{background:rgba(23,32,42,.04)}
         <div><label>Current appearance</label><div class="provider-access-panel" style="margin-top:0;min-height:42px;display:flex;align-items:center"><strong id="appearanceResolvedLabel">System</strong></div></div>
       </div>
     </div>
+    <div class="provider-section"><h3>Smart Randomizer</h3>
+      <div class="meta" style="margin-bottom:12px">Tune how strongly Smart Randomize avoids biomechanical redundancy. Builder filters always remain hard constraints. Muscle variety is off by default so focused sessions can intentionally train the same muscle group.</div>
+      <div class="smart-pref-toggle-row">
+        <div><strong>Smart Randomizer</strong><div class="meta">Turn off to choose randomly from the filtered exercise pool.</div></div>
+        <label class="toggle-switch smart-pref-switch"><input id="smartRandomizerEnabled" type="checkbox" checked aria-label="Smart Randomizer enabled"><span class="toggle-slider"></span></label>
+      </div>
+      <div class="smart-pref-grid">
+        <div class="smart-pref-control"><label for="smartExactDuplicate">Exact duplicate avoidance <span id="smartExactDuplicateValue" class="smart-pref-value">Maximum</span></label><input id="smartExactDuplicate" type="range" min="0" max="100" step="5" value="100"></div>
+        <div class="smart-pref-control"><label for="smartSimilarMovement">Similar movement avoidance <span id="smartSimilarMovementValue" class="smart-pref-value">High</span></label><input id="smartSimilarMovement" type="range" min="0" max="100" step="5" value="80"></div>
+        <div class="smart-pref-control"><label for="smartProviderDiversity">Provider diversity <span id="smartProviderDiversityValue" class="smart-pref-value">Low</span></label><input id="smartProviderDiversity" type="range" min="0" max="100" step="5" value="15"></div>
+        <div class="smart-pref-control"><label for="smartMuscleVariety">Muscle variety <span id="smartMuscleVarietyValue" class="smart-pref-value">Off</span></label><input id="smartMuscleVariety" type="range" min="0" max="100" step="5" value="0"></div>
+      </div>
+    </div>
     <div class="provider-section"><h3>Offline & Mobile</h3>
       <div class="meta" style="margin-bottom:12px">Saved circuits and favorites can keep eligible provider media available offline. Only media explicitly licensed for offline use will be cached; externally hosted sources such as YouTube remain online-only.</div>
       <div class="row">
@@ -1615,7 +1631,7 @@ html[data-theme="light"] .provider-hero-media{background:rgba(23,32,42,.04)}
   <section id="profileView" class="hidden"><div class="panel"><h2>Profile</h2><div class="meta">Profile identity, avatar, bio, and future social visibility controls will live here.</div></div></section>
   <section id="billingView" class="hidden"><div class="panel"><h2>Billing</h2><div class="meta">Kinetosphere subscription and provider-access billing controls will live here.</div></div></section>
   <section id="supportView" class="hidden"><div class="panel"><h2>Support</h2><div class="meta">Help, feedback, provider-access troubleshooting, and support requests will live here.</div></div></section>
-  <section id="aboutView" class="hidden"><div class="panel"><h2>About Kinetosphere</h2><div class="meta" style="margin-bottom:12px">Kinetosphere brings circuit building, provider programs, workout playback, and connected training libraries into one experience.</div><div class="notice"><strong>Current version:</strong> v6.10.18</div></div></section>
+  <section id="aboutView" class="hidden"><div class="panel"><h2>About Kinetosphere</h2><div class="meta" style="margin-bottom:12px">Kinetosphere brings circuit building, provider programs, workout playback, and connected training libraries into one experience.</div><div class="notice"><strong>Current version:</strong> v6.10.19</div></div></section>
 
   <section id="importerView" class="hidden">
     <div class="panel">
@@ -2599,7 +2615,7 @@ async function clearPrivateLocalData(){
   currentExercise=0;
   currentRound=1;
   if(el("youtubeApiKey")) el("youtubeApiKey").value="";
-  if(el("circuitName")) el("circuitName").value="";
+  if(el("circuitName")) el("circuitName").value="Current Circuit";
   if(el("circuitRounds")) el("circuitRounds").value=3;
   if(el("restBetweenSets")) el("restBetweenSets").value="0";
   if(el("restBetweenRounds")) el("restBetweenRounds").value="60";
@@ -3936,16 +3952,19 @@ function renderPicker(){
   rows.forEach(ex=>{
     const difficulty=exerciseDifficulty(ex);
     const purposes=exerciseWorkoutPurposes(ex);
+    const visiblePurposes=purposes.filter(p=>String(p).trim().toLowerCase()!=="general training");
     const playable=exerciseHasPlayableMedia(ex);
     const entitlement=exerciseEntitlement(ex);
+    const provider=providerForExercise(ex);
+    const accessBadge=entitlement.status && entitlement.status!=="Included" ? `<span class="badge entitlement-badge">Access: ${escapeHtml(entitlement.status)}</span>` : "";
     const d=document.createElement("div");d.className="item";
     d.innerHTML=`<div class="exercise-name-with-favorite">
         <div class="name">${cleanedExerciseName(ex)}</div>
         <button class="${favoriteButtonClass(ex.id,"small")}" data-favorite="${ex.id}" type="button" aria-label="${favoriteButtonLabel(ex.id)}" title="${favoriteButtonLabel(ex.id)}">${favoriteHeart(ex.id)}</button>
       </div>
       <div class="meta">${movementTypeLabel(ex)} → ${muscleGroupLabel(ex)} · ${inferDefaultPrescription(ex) || "Manual"} · ${equipmentLabel(ex)}${difficulty?` · <span class="badge">${difficulty}</span>`:""}</div>
-      ${providerCanonicalBadges(ex)}
-      ${purposes.length?`<div class="meta">${purposes.join(" · ")}</div>`:""}
+      <div class="provider-line"><span class="badge provider-badge">Provider: ${escapeHtml(provider.name)}</span>${accessBadge}</div>
+      ${visiblePurposes.length?`<div class="meta">${visiblePurposes.join(" · ")}</div>`:""}
       <div class="small-actions">
         ${entitlement.locked?`<button class="btn secondary" type="button" disabled title="Provider entitlement required">Locked</button>`:(playable?`<button class="btn primary" data-add="${ex.id}">Add to Circuit</button>`:`<button class="btn secondary" type="button" disabled title="Provider media has not yet been recovered">Media unavailable</button>`)}
         <button class="btn secondary" data-details="${ex.id}">Description</button>
@@ -4001,6 +4020,52 @@ function addToCircuit(id){
   renderCircuit();
 }
 
+const SMART_RANDOMIZER_PREF_KEYS={enabled:"smartRandomizerEnabled",exact:"smartRandomizerExactDuplicate",similar:"smartRandomizerSimilarMovement",provider:"smartRandomizerProviderDiversity",muscle:"smartRandomizerMuscleVariety"};
+let smartRandomizerPrefs={enabled:true,exact:100,similar:80,provider:15,muscle:0};
+function smartRandomizerLevelLabel(value){
+  const v=Number(value)||0;
+  if(v<=0) return "Off";
+  if(v<=25) return "Low";
+  if(v<=55) return "Medium";
+  if(v<=85) return "High";
+  return "Maximum";
+}
+function updateSmartRandomizerPrefUI(){
+  if(el("smartRandomizerEnabled")) el("smartRandomizerEnabled").checked=!!smartRandomizerPrefs.enabled;
+  [["smartExactDuplicate","exact"],["smartSimilarMovement","similar"],["smartProviderDiversity","provider"],["smartMuscleVariety","muscle"]].forEach(([id,key])=>{
+    if(el(id)) el(id).value=String(smartRandomizerPrefs[key]);
+    if(el(id+"Value")) el(id+"Value").textContent=smartRandomizerLevelLabel(smartRandomizerPrefs[key]);
+  });
+  if(el("randomizeExercises")){
+    el("randomizeExercises").textContent=smartRandomizerPrefs.enabled?"Smart Randomize":"Randomize";
+    el("randomizeExercises").title=smartRandomizerPrefs.enabled?"Build a circuit while avoiding duplicate and biomechanically redundant movements":"Choose randomly from the current filtered exercise pool";
+  }
+}
+async function loadSmartRandomizerPreferences(){
+  try{
+    const rows=await getAll("settings"); const map=new Map(rows.map(r=>[r.key,r.value]));
+    smartRandomizerPrefs={
+      enabled:String(map.get(SMART_RANDOMIZER_PREF_KEYS.enabled)??"true")!=="false",
+      exact:Number(map.get(SMART_RANDOMIZER_PREF_KEYS.exact)??100),
+      similar:Number(map.get(SMART_RANDOMIZER_PREF_KEYS.similar)??80),
+      provider:Number(map.get(SMART_RANDOMIZER_PREF_KEYS.provider)??15),
+      muscle:Number(map.get(SMART_RANDOMIZER_PREF_KEYS.muscle)??0)
+    };
+  }catch(e){ smartRandomizerPrefs={enabled:true,exact:100,similar:80,provider:15,muscle:0}; }
+  updateSmartRandomizerPrefUI();
+}
+async function saveSmartRandomizerPreferences(){
+  smartRandomizerPrefs={
+    enabled:Boolean(el("smartRandomizerEnabled")?.checked),
+    exact:Number(el("smartExactDuplicate")?.value??100),
+    similar:Number(el("smartSimilarMovement")?.value??80),
+    provider:Number(el("smartProviderDiversity")?.value??15),
+    muscle:Number(el("smartMuscleVariety")?.value??0)
+  };
+  updateSmartRandomizerPrefUI();
+  await Promise.all(Object.entries(SMART_RANDOMIZER_PREF_KEYS).map(([key,settingKey])=>put("settings",{key:settingKey,value:smartRandomizerPrefs[key]})));
+}
+
 function smartRandomizerTokens(values){
   return new Set((Array.isArray(values)?values:[values]).flatMap(v=>String(v||"").toLowerCase().split(/[^a-z0-9]+/)).filter(Boolean));
 }
@@ -4047,21 +4112,32 @@ function smartRandomizerOverlap(a,b){
 }
 function smartRandomizerCandidateScore(candidate, selected, usage){
   let score=Math.random()*7;
+  const exactWeight=(Number(smartRandomizerPrefs.exact)||0)/100;
+  const similarWeight=(Number(smartRandomizerPrefs.similar)||0)/100;
+  const providerWeight=(Number(smartRandomizerPrefs.provider)||0)/100;
+  const muscleWeight=(Number(smartRandomizerPrefs.muscle)||0)/100;
   const recent=selected.slice(-2);
-  if(selected.some(s=>s.canonical===candidate.canonical)) score-=1000;
-  if(selected.some(s=>s.canonicalFamily===candidate.canonicalFamily)) score-=240;
-  if(selected.some(s=>s.movementFamily===candidate.movementFamily)) score-=70;
-  if(recent.some(s=>smartRandomizerOverlap(s.muscles,candidate.muscles)>=0.67)) score-=90;
-  if(recent.some(s=>smartRandomizerOverlap(s.muscles,candidate.muscles)>=0.5)) score-=35;
-  let musclePenalty=0;
-  candidate.muscles.forEach(m=>{musclePenalty+=(usage.muscles.get(m)||0)*12;});
-  score-=musclePenalty;
-  score-=(usage.families.get(candidate.movementFamily)||0)*28;
-  score-=(usage.providers.get(candidate.provider)||0)*3;
-  if(!usage.providers.has(candidate.provider)) score+=8;
+  if(selected.some(s=>s.canonical===candidate.canonical)) score-=1400*exactWeight;
+  if(selected.some(s=>s.canonicalFamily===candidate.canonicalFamily)) score-=330*similarWeight;
+  if(selected.some(s=>s.movementFamily===candidate.movementFamily)) score-=120*similarWeight;
+  score-=(usage.families.get(candidate.movementFamily)||0)*38*similarWeight;
+  if(muscleWeight>0){
+    if(recent.some(s=>smartRandomizerOverlap(s.muscles,candidate.muscles)>=0.67)) score-=75*muscleWeight;
+    if(recent.some(s=>smartRandomizerOverlap(s.muscles,candidate.muscles)>=0.5)) score-=30*muscleWeight;
+    let musclePenalty=0;
+    candidate.muscles.forEach(m=>{musclePenalty+=(usage.muscles.get(m)||0)*10*muscleWeight;});
+    score-=musclePenalty;
+  }
+  score-=(usage.providers.get(candidate.provider)||0)*3*providerWeight;
+  if(!usage.providers.has(candidate.provider)) score+=8*providerWeight;
   return score;
 }
 function smartRandomizeRows(rows,count){
+  if(!smartRandomizerPrefs.enabled){
+    const shuffled=[...rows];
+    for(let i=shuffled.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [shuffled[i],shuffled[j]]=[shuffled[j],shuffled[i]]; }
+    return shuffled.slice(0,Math.min(count,shuffled.length));
+  }
   const pool=rows.map(smartRandomizerProfile);
   const selected=[];
   const usage={muscles:new Map(),families:new Map(),providers:new Map()};
@@ -4077,6 +4153,7 @@ function smartRandomizeRows(rows,count){
   }
   return selected.map(x=>x.ex);
 }
+
 function randomizeCurrentFilteredExercises(){
   const input=el("randomizeCount");
   let count=parseInt(input.value,10);
@@ -4121,7 +4198,9 @@ function randomizeCurrentFilteredExercises(){
   if(status){
     const providers=new Set(selected.map(ex=>providerForExercise(ex).name)).size;
     const families=new Set(selected.map(ex=>smartRandomizerMovementFamily(ex))).size;
-    status.textContent=`Smart circuit created: ${selected.length} movement${selected.length===1?"":"s"} · ${families} movement famil${families===1?"y":"ies"} · ${providers} provider${providers===1?"":"s"}. Filters were preserved.`;
+    status.textContent=smartRandomizerPrefs.enabled
+      ? `Smart circuit created: ${selected.length} movement${selected.length===1?"":"s"} · ${families} movement famil${families===1?"y":"ies"} · ${providers} provider${providers===1?"":"s"}. Filters were preserved.`
+      : `Random circuit created: ${selected.length} movement${selected.length===1?"":"s"}. Filters were preserved; Smart Randomizer is off.`;
   }
   renderCircuit();
 }
@@ -4497,7 +4576,7 @@ function renderCircuit(){
     d.draggable=true;
     d.dataset.index=i;
     d.innerHTML=`
-      <div class="drag-handle" title="Drag to reorder">☰</div>
+      <div class="drag-handle" data-touch-drag="${i}" title="Drag to reorder">☰</div>
       <div>
         <div class="name">${i+1}. ${cleanedExerciseName(ex)}</div>
         <div class="meta">${movementTypeLabel(ex)} → ${muscleGroupLabel(ex)} · ${ex.mode} · ${escapeHtml(providerForExercise(ex).name)}</div>
@@ -4554,6 +4633,35 @@ function renderCircuit(){
     d.addEventListener("dragend",()=>d.classList.remove("dragging"));
     d.addEventListener("dragover",e=>{e.preventDefault();e.dataTransfer.dropEffect="move";});
     d.addEventListener("drop",e=>{e.preventDefault();moveCircuitItem(draggedIndex,i);});
+    const touchHandle=d.querySelector("[data-touch-drag]");
+    if(touchHandle){
+      let touchDragActive=false;
+      let touchDragFrom=i;
+      touchHandle.addEventListener("pointerdown",e=>{
+        if(e.pointerType==="mouse") return;
+        touchDragActive=true; touchDragFrom=i; d.classList.add("dragging");
+        try{ touchHandle.setPointerCapture(e.pointerId); }catch(_){}
+        e.preventDefault();
+      });
+      touchHandle.addEventListener("pointermove",e=>{
+        if(!touchDragActive) return;
+        const target=document.elementFromPoint(e.clientX,e.clientY)?.closest?.(".circuit-item[data-index]");
+        c.querySelectorAll(".circuit-item.touch-drag-target").forEach(x=>x.classList.remove("touch-drag-target"));
+        if(target && target!==d) target.classList.add("touch-drag-target");
+        e.preventDefault();
+      });
+      const finishTouchDrag=e=>{
+        if(!touchDragActive) return;
+        touchDragActive=false; d.classList.remove("dragging");
+        const target=document.elementFromPoint(e.clientX,e.clientY)?.closest?.(".circuit-item[data-index]");
+        c.querySelectorAll(".circuit-item.touch-drag-target").forEach(x=>x.classList.remove("touch-drag-target"));
+        if(target){ const to=Number(target.dataset.index); if(Number.isFinite(to)) moveCircuitItem(touchDragFrom,to); }
+        try{ touchHandle.releasePointerCapture(e.pointerId); }catch(_){}
+        e.preventDefault();
+      };
+      touchHandle.addEventListener("pointerup",finishTouchDrag);
+      touchHandle.addEventListener("pointercancel",e=>{ touchDragActive=false; d.classList.remove("dragging"); c.querySelectorAll(".circuit-item.touch-drag-target").forEach(x=>x.classList.remove("touch-drag-target")); });
+    }
     c.appendChild(d);
   });
   c.querySelectorAll("[data-pres]").forEach(inp=>inp.oninput=()=>{
@@ -4636,10 +4744,11 @@ function findSavedCircuitByName(name){
 async function saveForFuture(){
   if(!workingCircuit.length){alert("Add at least one exercise.");return;}
 
-  let name=(el("circuitName").value.trim() || "Untitled Circuit").trim();
-  if(!name){
-    name=prompt("Name this saved circuit:");
+  let name=(el("circuitName").value.trim() || "Current Circuit").trim();
+  if(!name || name==="Current Circuit"){
+    name=prompt("Name this saved circuit:", name==="Current Circuit"?"":name);
     if(!name) return;
+    el("circuitName").value=name;
   }
 
   let existing=findSavedCircuitByName(name);
@@ -4669,7 +4778,7 @@ async function saveForFuture(){
 
   // Start the next circuit with the safe default name so a previously
   // loaded/saved workout is not accidentally overwritten.
-  el("circuitName").value="";
+  el("circuitName").value="Current Circuit";
 
   const btn=el("saveForFuture");
   const old=btn.textContent;
@@ -4680,7 +4789,7 @@ async function saveForFuture(){
 function loadSavedCircuit(id){
   const circuit=circuits.find(c=>c.id===id);
   if(!circuit) return;
-  el("circuitName").value=circuit.name || "Untitled Circuit";
+  el("circuitName").value=circuit.name || "Current Circuit";
   el("circuitRounds").value=circuit.rounds || 1;
   el("restBetweenSets").value=String(circuit.restBetweenSets || 0);
   el("restBetweenRounds").value=String(circuit.restBetweenRounds || 60);
@@ -4694,7 +4803,7 @@ async function launchSavedCircuit(id){
   if(!circuit) return;
   activeCircuit={
     id:"active",
-    name:circuit.name || "Untitled Circuit",
+    name:circuit.name || "Current Circuit",
     rounds:circuit.rounds || 1,
     restBetweenSets:Number(circuit.restBetweenSets || 0),
     restBetweenRounds:Number(circuit.restBetweenRounds || 60),
@@ -4833,7 +4942,7 @@ function renderSavedCircuits(){
 
 async function saveCircuit(){
   if(!workingCircuit.length){alert("Add at least one exercise.");return;}
-  const circuit={id:uid("c"),name:el("circuitName").value.trim()||"Untitled Circuit",
+  const circuit={id:uid("c"),name:el("circuitName").value.trim()||"Current Circuit",
     rounds:Number(el("circuitRounds").value||1),
     restBetweenSets:Number(el("restBetweenSets").value||0),
     restBetweenRounds:Number(el("restBetweenRounds").value||60),
@@ -4842,7 +4951,7 @@ async function saveCircuit(){
   await put("circuits",circuit);circuits=await getAll("circuits");
   activeCircuit=circuit;await put("settings",{key:"activeCircuit",value:activeCircuit});
   renderSavedCircuits();
-  el("circuitName").value="";
+  el("circuitName").value="Current Circuit";
   showSaveToast("Circuit saved.");
   queueOfflineSyncSoon();
 }
@@ -4855,7 +4964,7 @@ function prepareCurrentBuilderCircuitForPlayer(){
   }
   activeCircuit={
     id:"active",
-    name:el("circuitName").value.trim()||"Untitled Circuit",
+    name:el("circuitName").value.trim()||"Current Circuit",
     rounds:Number(el("circuitRounds").value||1),
     restBetweenSets:Number(el("restBetweenSets").value||0),
     restBetweenRounds:Number(el("restBetweenRounds").value||60),
@@ -5444,7 +5553,6 @@ async function nativeHaptic(kind="light"){
 }
 function updateMobileNavActive(name){
   document.querySelectorAll("[data-mobile-view]").forEach(btn=>btn.classList.toggle("active",btn.dataset.mobileView===name || (name==="providerDetail" && btn.dataset.mobileView==="discover")));
-  const more=el("mobileMoreBtn"); if(more) more.classList.toggle("active",["library","account","preferences","profile","billing","support","about","importer"].includes(name));
 }
 async function getNetworkState(){
   let connected=navigator.onLine!==false, connectionType="unknown";
@@ -5526,11 +5634,14 @@ function showOfflineMovementVideo(asset){
 
 function initMobileShellControls(){
   document.querySelectorAll("[data-mobile-view]").forEach(btn=>btn.addEventListener("click",()=>{ nativeHaptic("light"); showView(btn.dataset.mobileView); }));
-  if(el("mobileMoreBtn")) el("mobileMoreBtn").addEventListener("click",()=>{
-    nativeHaptic("light");
-    const menu=el("settingsMenu");
-    if(menu){ menu.classList.toggle("hidden"); el("settingsMenuBtn")?.setAttribute("aria-expanded",String(!menu.classList.contains("hidden"))); }
+  if(el("smartRandomizerEnabled")) el("smartRandomizerEnabled").onchange=saveSmartRandomizerPreferences;
+  ["smartExactDuplicate","smartSimilarMovement","smartProviderDiversity","smartMuscleVariety"].forEach(id=>{
+    if(el(id)){ el(id).oninput=()=>{ const key={smartExactDuplicate:"exact",smartSimilarMovement:"similar",smartProviderDiversity:"provider",smartMuscleVariety:"muscle"}[id]; smartRandomizerPrefs[key]=Number(el(id).value); updateSmartRandomizerPrefUI(); }; el(id).onchange=saveSmartRandomizerPreferences; }
   });
+  if(el("toggleSavedCircuitsMobile")) el("toggleSavedCircuitsMobile").onclick=()=>{
+    const body=el("savedCircuitsMobileBody"), btn=el("toggleSavedCircuitsMobile"); if(!body||!btn) return;
+    const collapsed=body.classList.toggle("mobile-collapsed"); btn.setAttribute("aria-expanded",String(!collapsed)); btn.textContent=collapsed?"Expand ▾":"Collapse ▴"; nativeHaptic("light");
+  };
   if(el("offlineStorageLimit")) el("offlineStorageLimit").onchange=saveOfflinePreferences;
   if(el("offlineWifiOnly")) el("offlineWifiOnly").onchange=saveOfflinePreferences;
   if(el("syncOfflineMediaBtn")) el("syncOfflineMediaBtn").onclick=()=>syncOfflineMedia();
@@ -5729,57 +5840,6 @@ function getActiveItems(){
 let ytPlayer=null;
 let ytPlayerReady=false;
 let pendingVideoId=null;
-const KINETOSPHERE_PUBLIC_ORIGIN="https://circuitbuilder.rosshomegym.com";
-const KINETOSPHERE_NATIVE=Boolean(
-  (window.Capacitor && typeof window.Capacitor.isNativePlatform==="function" && window.Capacitor.isNativePlatform()) ||
-  !/^https?:$/.test(window.location.protocol)
-);
-function kinetosphereApiUrl(path){
-  return KINETOSPHERE_NATIVE ? KINETOSPHERE_PUBLIC_ORIGIN + path : path;
-}
-function kinetospherePlayerOrigin(){
-  return KINETOSPHERE_NATIVE ? KINETOSPHERE_PUBLIC_ORIGIN : window.location.origin;
-}
-
-// RC7 / TestFlight 1.0 (6): native iOS uses a same-origin HTTPS YouTube bridge
-// hosted by Kinetosphere. This keeps playback inline while ensuring YouTube sees
-// a normal HTTPS embedder origin rather than the Capacitor local scheme.
-let hostedYoutubeVideoId="";
-function hostedYoutubeFrame(){
-  return document.querySelector("#ytFrame iframe[data-kinetosphere-youtube-bridge]");
-}
-function hostedYoutubePost(type,extra={}){
-  const frame=hostedYoutubeFrame();
-  if(!frame || !frame.contentWindow) return;
-  try{ frame.contentWindow.postMessage({source:"kinetosphere-parent",type,...extra},KINETOSPHERE_PUBLIC_ORIGIN); }catch(e){}
-}
-function loadHostedYoutubeBridge(videoId){
-  const host=el("ytFrame");
-  if(!host || !videoId) return false;
-  const muted=gymVideoAudioMuted?"1":"0";
-  const src=`${KINETOSPHERE_PUBLIC_ORIGIN}/embed/youtube?id=${encodeURIComponent(videoId)}&muted=${muted}`;
-  if(hostedYoutubeVideoId!==videoId || !hostedYoutubeFrame()){
-    host.innerHTML=`<iframe data-kinetosphere-youtube-bridge title="Exercise demonstration" src="${src}" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin" style="width:100%;height:100%;display:block"></iframe>`;
-    hostedYoutubeVideoId=videoId;
-  } else {
-    hostedYoutubePost("load",{videoId});
-    hostedYoutubePost(gymVideoAudioMuted?"mute":"unmute");
-    hostedYoutubePost("play");
-  }
-  return true;
-}
-function stopHostedYoutubeBridge(){
-  const host=el("ytFrame");
-  if(host && hostedYoutubeFrame()) host.innerHTML="";
-  hostedYoutubeVideoId="";
-}
-
-window.addEventListener("message",(event)=>{
-  if(event.origin!==KINETOSPHERE_PUBLIC_ORIGIN) return;
-  const msg=event.data||{};
-  if(msg.source==="kinetosphere-youtube" && msg.type==="error") console.warn("Hosted YouTube bridge error",msg.data);
-});
-
 let initialVideoLoaded=false;
 let ytRetryTimer=null;
 
@@ -5813,6 +5873,8 @@ function ensureYouTubePlayer(videoId){
 
   if(ytPlayer) return;
 
+  // Create the persistent player without preloading Movement 1.
+  // Movement 1 is loaded only after onReady fires.
   ytPlayer=new YT.Player("ytFrame",{
     width:"100%",
     height:"100%",
@@ -5820,13 +5882,13 @@ function ensureYouTubePlayer(videoId){
       autoplay:1,
       playsinline:1,
       rel:0,
-      origin:kinetospherePlayerOrigin(),
-      widget_referrer:kinetospherePlayerOrigin()
+      origin:window.location.origin
     },
     events:{
       onReady:(event)=>{
         ytPlayerReady=true;
         try{ event.target.mute(); }catch(e){}
+        // Let YouTube finish its ready event before issuing the first load.
         setTimeout(()=>playPendingMovement(),0);
       },
       onStateChange:(event)=>{
@@ -5839,6 +5901,8 @@ function ensureYouTubePlayer(videoId){
       },
       onError:(event)=>{
         console.warn("YouTube player error",event.data);
+        // The first movement can occasionally race player startup on Safari/iOS.
+        // Retry that same movement once after readiness has settled.
         if(ytPlayerReady && pendingVideoId && !initialVideoLoaded){
           clearTimeout(ytRetryTimer);
           ytRetryTimer=setTimeout(()=>playPendingMovement(),300);
@@ -5863,7 +5927,7 @@ function loadMovementVideo(videoId){
 }
 
 function embedUrl(id){
-  const origin = encodeURIComponent(kinetospherePlayerOrigin());
+  const origin = encodeURIComponent(window.location.origin);
   return `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&loop=1&playlist=${id}&playsinline=1&rel=0&origin=${origin}`;
 }
 
@@ -5892,12 +5956,10 @@ function updateGymVideoAudioButton(){
   btn.classList.toggle("secondary",gymVideoAudioMuted);
 }
 function applyGymAudioToYouTube(){
-  if(KINETOSPHERE_NATIVE && hostedYoutubeFrame()){
-    hostedYoutubePost(gymVideoAudioMuted?"mute":"unmute");
-    return;
-  }
   if(!ytPlayerReady || !ytPlayer) return;
   try{
+    // v6.10.17: true provider mute. Countdown/workout cues now use a separate
+    // Kinetosphere-owned audio channel, so YouTube no longer needs to stay unmuted.
     if(gymVideoAudioMuted){
       if(typeof ytPlayer.setVolume==="function") ytPlayer.setVolume(0);
       if(typeof ytPlayer.mute==="function") ytPlayer.mute();
@@ -5908,12 +5970,16 @@ function applyGymAudioToYouTube(){
   }catch(e){ console.warn("YouTube audio toggle unavailable",e); }
 }
 function scheduleGymAudioForYouTube(){
+  // The protected persistent YouTube engine mutes each fresh load. Reapply the
+  // John's Gym state after the provider has settled, without modifying that engine.
   [0,100,300,700,1200].forEach(delay=>setTimeout(()=>applyGymAudioToYouTube(),delay));
 }
 function applyGymAudioToStream(){
   const frame=el("streamFrame");
   if(!frame || frame.classList.contains("hidden") || typeof Stream!=="function") return;
   try{
+    // Reuse the SDK player when available so the mute command targets the exact
+    // active Stream iframe. Setting both muted and volume makes silence explicit.
     streamSdkPlayer=streamSdkPlayer || Stream(frame);
     streamSdkPlayer.muted=Boolean(gymVideoAudioMuted);
     streamSdkPlayer.volume=gymVideoAudioMuted ? 0 : 1;
@@ -5925,6 +5991,8 @@ function scheduleGymAudioForStream(){
 function applyGymVideoAudioState(){
   const offlineVideo=el("offlineVideoFrame"); if(offlineVideo){ offlineVideo.muted=Boolean(gymVideoAudioMuted); offlineVideo.volume=gymVideoAudioMuted?0:1; }
   updateGymVideoAudioButton();
+  // Apply to both provider objects. The hidden/inactive one is harmless; this
+  // prevents provider-state races from leaving audible playback behind.
   scheduleGymAudioForYouTube();
   scheduleGymAudioForStream();
 }
@@ -5946,16 +6014,12 @@ function stopHostedMovementVideo(){
   activeHostedVideoId="";
 }
 
-async function showYouTubeMovementVideo(videoId){
+function showYouTubeMovementVideo(videoId){
   stopOfflineMovementVideo();
   const yt=el("ytFrame");
   if(activeVideoProvider==="cloudflare_stream") stopHostedMovementVideo();
   if(yt) yt.classList.remove("hidden");
   activeVideoProvider="youtube";
-  if(KINETOSPHERE_NATIVE){
-    const hostedOk=loadHostedYoutubeBridge(videoId);
-    if(hostedOk){ scheduleGymAudioForYouTube(); updateGymVideoAudioButton(); return; }
-  }
   loadMovementVideo(videoId);
   scheduleGymAudioForYouTube();
   updateGymVideoAudioButton();
@@ -5967,7 +6031,6 @@ function showHostedMovementVideo(videoId,loopUntilAdvance=true,muted=false){
   const yt=el("ytFrame");
   if(!frame || !videoId) return;
   if(yt) yt.classList.add("hidden");
-  if(KINETOSPHERE_NATIVE) stopHostedYoutubeBridge();
   if(ytPlayerReady && ytPlayer){ try{ ytPlayer.stopVideo(); }catch(e){} }
   const shouldLoop=loopUntilAdvance!==false;
   const src=`https://iframe.videodelivery.net/${encodeURIComponent(videoId)}?autoplay=true&muted=${gymVideoAudioMuted?"true":"false"}&controls=true&preload=auto${shouldLoop?"&loop=true":""}`;
@@ -6012,7 +6075,6 @@ function loadExerciseVideo(ex){
 function stopAllMovementVideo(){
   stopOfflineMovementVideo();
   stopHostedMovementVideo();
-  if(KINETOSPHERE_NATIVE) stopHostedYoutubeBridge();
   const yt=el("ytFrame");
   if(yt) yt.classList.remove("hidden");
   if(ytPlayerReady && ytPlayer){ try{ ytPlayer.stopVideo(); }catch(e){} }
@@ -6062,28 +6124,19 @@ async function getRapidSupportedMuscles(){
   if(rapidSupportedMuscles) return rapidSupportedMuscles;
   if(rapidSupportedPromise) return rapidSupportedPromise;
   rapidSupportedPromise=(async()=>{
-    try{
-      const response=await fetch(kinetosphereApiUrl("/api/muscle-groups"),{cache:"force-cache"});
-      if(!response.ok) throw new Error(`Muscle group API ${response.status}`);
-      const data=await response.json();
-      let list=[];
-      if(Array.isArray(data)) list=data;
-      else if(Array.isArray(data.muscleGroups)) list=data.muscleGroups;
-      else if(Array.isArray(data.muscles)) list=data.muscles;
-      else if(Array.isArray(data.data)) list=data.data;
-      else list=Object.keys(data||{});
-      rapidSupportedMuscles=new Set(list.map(x=>{
-        if(typeof x==="string") return x;
-        return x?.name || x?.id || x?.slug || "";
-      }).filter(Boolean));
-    }catch(err){
-      if(!KINETOSPHERE_NATIVE) throw err;
-      // Native WKWebView can enforce CORS against the bundled custom scheme.
-      // The image endpoint itself can still be displayed cross-origin, so keep
-      // a bundled capability list as a resilient native fallback.
-      rapidSupportedMuscles=new Set(Object.values(RAPID_MUSCLE_CANDIDATES).flat());
-      console.warn("Using bundled muscle-group capability map on native",err);
-    }
+    const response=await fetch("/api/muscle-groups",{cache:"force-cache"});
+    if(!response.ok) throw new Error(`Muscle group API ${response.status}`);
+    const data=await response.json();
+    let list=[];
+    if(Array.isArray(data)) list=data;
+    else if(Array.isArray(data.muscleGroups)) list=data.muscleGroups;
+    else if(Array.isArray(data.muscles)) list=data.muscles;
+    else if(Array.isArray(data.data)) list=data.data;
+    else list=Object.keys(data||{});
+    rapidSupportedMuscles=new Set(list.map(x=>{
+      if(typeof x==="string") return x;
+      return x?.name || x?.id || x?.slug || "";
+    }).filter(Boolean));
     return rapidSupportedMuscles;
   })();
   try{return await rapidSupportedPromise}
@@ -6178,14 +6231,14 @@ async function updateMuscleMap(ex){
       if(!attemptedPrimaryOnly && secondary.length){
         attemptedPrimaryOnly=true;
         status.textContent="Retrying muscle image…";
-        img.src=kinetosphereApiUrl("/api/muscle-image?")+primaryOnlyParams.toString();
+        img.src="/api/muscle-image?"+primaryOnlyParams.toString();
         return;
       }
       img.classList.add("hidden");
       status.classList.remove("hidden");
       status.textContent="Muscle image unavailable.";
     };
-    img.src=kinetosphereApiUrl("/api/muscle-image?")+params.toString();
+    img.src="/api/muscle-image?"+params.toString();
   }catch(err){
     if(token!==rapidMuscleRenderToken) return;
     console.warn("Muscle image error",err);
@@ -7236,6 +7289,7 @@ async function init(){
   initProgramBrowser();
 
   await openDB();
+  await loadSmartRandomizerPreferences();
   await loadProgramFavorites();
   await loadProgramCompletions();
   try{
@@ -7250,7 +7304,7 @@ async function init(){
   if(activeCircuit){
     workingCircuit=activeCircuit.items.map(x=>({...x}));
     workingProgramContext=activeCircuit.programContext?JSON.parse(JSON.stringify(activeCircuit.programContext)):null;
-    el("circuitName").value=activeCircuit.name||"Full Body A";
+    el("circuitName").value=activeCircuit.name||"Current Circuit";
     el("circuitRounds").value=activeCircuit.rounds||3;
   }
 
@@ -7268,7 +7322,7 @@ async function init(){
   // Default to Build Circuit only if the user has not already selected a tab while async startup was finishing.
   if(startupNavigationPending){
     showView("builder");
-    if(el("circuitName")) el("circuitName").value="";
+    if(el("circuitName")) el("circuitName").value="Current Circuit";
   }
 }
 

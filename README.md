@@ -19,3 +19,16 @@ Do not deploy this ZIP to Cloudflare. The Cloudflare web baseline remains v6.10.
 ## RC12 — Smart Randomizer
 
 Synchronized with web v6.10.18. Builder Smart Randomize now uses canonical identity, canonical-family relationships, movement-family diversity, muscle-load overlap, and provider diversity while preserving current Builder filters as hard constraints. The established hosted-YouTube iOS bridge, muscle-map routing, iPad polish, app icon, and automatic TestFlight build numbering are retained.
+
+
+## RC13 — Builder UX + Smart Randomizer Preferences
+- Synced with web v6.10.19.
+- Smart Randomizer defaults: exact duplicate avoidance Maximum, similar movement avoidance High, provider diversity Low, muscle variety Off.
+- Smart Randomizer can be disabled for plain random selection.
+- Current Circuit drag handles support touch/pointer reordering on iOS.
+- Current Circuit is the default circuit name.
+- Mobile Builder order: Current Circuit, Saved Circuits, Exercise Library.
+- Saved Circuits can collapse on mobile.
+- Primary nav order: Build, Programs, Player, Discover, Settings.
+- Player navigation and Launch Player use a yellow call-to-action treatment.
+- User-facing Builder exercise cards no longer expose canonical metadata and suppress generic General Training labels.
