@@ -43,7 +43,7 @@ function youtubeEmbedPage(requestUrl) {
   const html = `<!doctype html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="referrer" content="strict-origin-when-cross-origin">
-<style>html,body,#player{margin:0;width:100%;height:100%;background:#000;overflow:hidden}iframe{display:block;width:100%;height:100%;border:0}</style></head>
+<style>html,body{margin:0;width:100%;height:100%;background:#000;overflow:hidden;position:relative}#player,#player iframe{position:absolute!important;inset:0!important;margin:0!important;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;border:0!important;display:block!important;background:#000}</style></head>
 <body><div id="player"></div>
 <script src="https://www.youtube.com/iframe_api"></script>
 <script>

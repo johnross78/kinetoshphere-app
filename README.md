@@ -45,7 +45,7 @@ Synchronized with web v6.10.18. Builder Smart Randomize now uses canonical ident
 - Admin Media Health queue reads the new Supabase media_health_issues table.
 
 ## RC19 — Native layout regression recovery
-- Synced with web v6.10.25.
+- Synced with web v6.10.26.
 - Restores native iOS safe-area header clearance across iPhone and iPad.
 - Restores full-frame sizing for the hosted HTTPS YouTube bridge.
 - Mobile Player tab now prepares the current Builder circuit automatically, matching web/iPad behavior.
@@ -60,3 +60,11 @@ RC19 reliability notes:
 - Native iOS muscle images no longer depend on a CORS-sensitive /api/muscle-groups fetch; Worker API routes also emit CORS headers.
 - Added interim Exercise & Health Disclaimer under Settings > About for later legal review.
 - FUTURE: when providers supply licensed raw HLS/MP4 media, add native AirPlay routing / route picker and TV-optimized playback. Do not treat YouTube bridge content as provider-owned AirPlay media.
+
+
+## RC20 — iOS Player aspect-ratio recovery + provider section collapse
+- Native iPad landscape restores strict 16:9 video geometry; the information card matches the video height rather than stretching the row.
+- Native iPhone landscape uses a height-aware 16:9 stage with reserved readable width for the information card and movement strip.
+- Hosted YouTube bridge iframe is pinned to the full centered media surface.
+- Programs / Flows provider sections can be expanded or collapsed; state is remembered for the current app session.
+- Web Player geometry remains unchanged.
