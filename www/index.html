@@ -125,7 +125,9 @@ textarea{min-height:90px;resize:vertical}
 .training-title{font-size:21px;font-weight:900}
 .training-body label{margin-top:14px}
 
-.builder-grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:14px}
+.builder-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:14px}
+#builderView .builder-grid > .panel:first-child{order:2}
+#builderView .builder-grid > div:nth-child(2){order:1}
 .library-picker{max-height:540px;overflow:auto;display:flex;flex-direction:column;gap:8px}
 .circuit-list{display:flex;flex-direction:column;gap:8px}
 .circuit-item{
@@ -1115,7 +1117,9 @@ button[data-delete-saved]:hover{background:#e8b5b5 !important;}
   color:#ff4d4f;
 }
 @media (max-width:520px){
-  .current-circuit-meta-row{grid-template-columns:minmax(0,1fr) 178px}
+  .current-circuit-meta-row{grid-template-columns:1fr}
+  .rounds-label-row,.rounds-rest-row{grid-template-columns:58px minmax(0,1fr) minmax(0,1fr)}
+  .current-circuit-rounds-stack #circuitRounds{width:58px}
 }
 
 /* v6.6.20 timer alert polish */
@@ -1242,7 +1246,7 @@ html[data-theme="light"] .provider-hero-media{background:rgba(23,32,42,.04)}
 }
 
 
-/* v6.10.19 Builder usability + Smart Randomizer controls */
+/* v6.10.20 Builder usability + Smart Randomizer controls */
 .tab.player-tab{background:#f2c94c;color:#211700;box-shadow:0 0 0 1px rgba(0,0,0,.08) inset}
 .tab.player-tab:hover{filter:brightness(1.04)}
 #launchCircuit{background:#f2c94c;color:#211700}
@@ -1258,6 +1262,29 @@ html[data-theme="light"] .provider-hero-media{background:rgba(23,32,42,.04)}
 .smart-pref-control label{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-top:0}
 .smart-pref-value{color:var(--accent);text-transform:none;letter-spacing:0}
 .smart-pref-control input[type=range]{padding:0;background:transparent;border:0;min-height:28px}
+
+/* v6.10.20 responsive Builder/Player + media-health polish */
+#savedCircuitsAuthHint:empty{display:none}
+.media-health-row{display:grid;grid-template-columns:minmax(130px,.8fr) minmax(180px,1.2fr) auto;gap:10px;align-items:center;padding:10px;border:1px solid var(--border);border-radius:10px;background:var(--surface-fainter);margin-top:8px}
+.media-health-row .media-health-status{font-weight:850}
+@media (max-width:900px){.media-health-row{grid-template-columns:1fr}}
+@media (max-width:760px){
+  #builderView .circuit-item{grid-template-columns:34px minmax(0,1fr)!important;align-items:start;padding:10px;overflow:hidden}
+  #builderView .circuit-item > *{min-width:0}
+  #builderView .circuit-item .drag-handle{grid-row:1 / span 3;grid-column:1}
+  #builderView .circuit-item-copy{grid-column:2}
+  #builderView .circuit-item-controls{grid-column:2;width:100%;min-width:0}
+  #builderView .circuit-item-controls > input{width:100%;max-width:100%;box-sizing:border-box}
+  #builderView .circuit-item .prescription-wheel-row{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)!important;width:100%}
+  #builderView .circuit-item .training-fields{grid-template-columns:1fr!important;width:100%}
+  #builderView .circuit-item .training-fields input,#builderView .circuit-item .training-fields textarea{width:100%;max-width:100%;box-sizing:border-box}
+  #builderView .circuit-item .circuit-remove{grid-column:2;width:100%}
+  #builderView .current-circuit-meta-row{grid-template-columns:1fr!important}
+  #playerView .controls{position:static!important;bottom:auto!important;margin:8px 0 0!important}
+  #playerView .info-card{overflow:visible}
+  #playerView .prescription-timer-row{position:relative;z-index:1}
+  #playerView .timer-action-row{position:relative;z-index:1}
+}
 </style>
 <link rel="stylesheet" href="mobile-shell.css" />
 </head>
@@ -1269,7 +1296,7 @@ html[data-theme="light"] .provider-hero-media{background:rgba(23,32,42,.04)}
     <div>
       <div class="brand">
         <img class="brand-logo" id="brandLogo" src="assets/brand/orbit-lockup-dark.svg" alt="Kinetosphere" />
-        <span class="version-badge admin-only hidden" id="headerVersionBadge">v6.10.19</span>
+        <span class="version-badge admin-only hidden" id="headerVersionBadge">v6.10.20</span>
       </div>
       <div class="sub" id="subtitle"></div>
     </div>
@@ -1505,6 +1532,7 @@ html[data-theme="light"] .provider-hero-media{background:rgba(23,32,42,.04)}
             <button class="btn secondary saved-circuits-mobile-toggle" id="toggleSavedCircuitsMobile" type="button" aria-expanded="true">Collapse ▴</button>
           </div>
           <div id="savedCircuitsMobileBody">
+            <div class="meta" id="savedCircuitsAuthHint" style="margin-bottom:10px"></div>
             <div class="meta" style="margin-bottom:10px">Load a saved circuit into the builder, or launch it immediately.</div>
             <div class="list" id="savedCircuitsList" style="max-height:250px"></div>
           </div>
@@ -1631,12 +1659,16 @@ html[data-theme="light"] .provider-hero-media{background:rgba(23,32,42,.04)}
   <section id="profileView" class="hidden"><div class="panel"><h2>Profile</h2><div class="meta">Profile identity, avatar, bio, and future social visibility controls will live here.</div></div></section>
   <section id="billingView" class="hidden"><div class="panel"><h2>Billing</h2><div class="meta">Kinetosphere subscription and provider-access billing controls will live here.</div></div></section>
   <section id="supportView" class="hidden"><div class="panel"><h2>Support</h2><div class="meta">Help, feedback, provider-access troubleshooting, and support requests will live here.</div></div></section>
-  <section id="aboutView" class="hidden"><div class="panel"><h2>About Kinetosphere</h2><div class="meta" style="margin-bottom:12px">Kinetosphere brings circuit building, provider programs, workout playback, and connected training libraries into one experience.</div><div class="notice"><strong>Current version:</strong> v6.10.19</div></div></section>
+  <section id="aboutView" class="hidden"><div class="panel"><h2>About Kinetosphere</h2><div class="meta" style="margin-bottom:12px">Kinetosphere brings circuit building, provider programs, workout playback, and connected training libraries into one experience.</div><div class="notice"><strong>Current version:</strong> v6.10.20</div></div></section>
 
   <section id="importerView" class="hidden">
     <div class="panel">
       <h2>Backend Provider Administration</h2>
       <div class="notice">Administrative ingestion tools. This view is intentionally not linked in the user-facing navigation.</div>
+      <div class="provider-section" id="mediaHealthAdmin" style="margin-top:18px">
+        <div class="programs-header-row"><div><h2 style="margin:0">Media Health</h2><div class="meta" style="margin-top:5px">Tracks missing, stale, private, or otherwise unavailable provider media without silently substituting a different movement.</div></div><button class="btn secondary" id="refreshMediaHealth" type="button">Refresh</button></div>
+        <div class="provider-access-panel"><div class="provider-access-state"><strong>Open media issues</strong><span class="badge" id="mediaHealthCount">—</span></div><div id="mediaHealthList" class="list"><div class="meta">Open Admin to load media health.</div></div></div>
+      </div>
       <div id="ownerImportTools">
       <div id="providerStorefrontAdmin" style="margin-bottom:22px">
         <h2>Provider Storefront Editor</h2>
@@ -3977,6 +4009,18 @@ function renderPicker(){
 }
 
 
+async function loadMediaHealthIssues(){
+  if(!isAdminUser()) return;
+  const list=el("mediaHealthList"), count=el("mediaHealthCount");
+  if(list) list.innerHTML='<div class="meta">Loading media health…</div>';
+  const {data,error}=await supabaseClient.from("media_health_issues").select("entity_id,provider_name,media_provider,media_ref,status,issue_type,issue_detail,last_checked_at,resolved_at").is("resolved_at",null).neq("status","available").order("updated_at",{ascending:false});
+  if(error){ if(list) list.innerHTML=`<div class="meta">Unable to load media health: ${escapeHtml(error.message)}</div>`; return; }
+  const rows=data||[]; if(count) count.textContent=String(rows.length);
+  if(!list) return;
+  if(!rows.length){ list.innerHTML='<div class="meta">No open media issues.</div>'; return; }
+  list.innerHTML=rows.map(r=>`<div class="media-health-row"><div><div class="name">${escapeHtml(r.entity_id)}</div><div class="meta">${escapeHtml(r.provider_name||"Unknown provider")} · ${escapeHtml(r.media_provider||"")}</div></div><div><div class="media-health-status">${escapeHtml((r.status||"").replaceAll("_"," "))}</div><div class="meta">${escapeHtml(r.issue_detail||r.issue_type||"")}</div></div><div class="meta">${r.media_ref?escapeHtml(r.media_ref):"No media ref"}</div></div>`).join("");
+}
+
 // v6.6.24 program-data plumbing. These helpers intentionally have no visible UI yet.
 function normalizeProgramRecord(record){
   const p=record?.data||record||{};
@@ -4577,7 +4621,7 @@ function renderCircuit(){
     d.dataset.index=i;
     d.innerHTML=`
       <div class="drag-handle" data-touch-drag="${i}" title="Drag to reorder">☰</div>
-      <div>
+      <div class="circuit-item-copy">
         <div class="name">${i+1}. ${cleanedExerciseName(ex)}</div>
         <div class="meta">${movementTypeLabel(ex)} → ${muscleGroupLabel(ex)} · ${ex.mode} · ${escapeHtml(providerForExercise(ex).name)}</div>
         <div class="order-actions">
@@ -4586,7 +4630,7 @@ function renderCircuit(){
           <button class="btn secondary" data-details="${ex.id}">Details</button>
         </div>
       </div>
-      <div>
+      <div class="circuit-item-controls">
         <input value="${row.prescription||""}" data-pres="${i}" placeholder="Prescription (custom / round progression)" title="Optional: type a custom prescription or slash-separated round progression">
         <div class="prescription-wheel-row">
           <div class="wheel-group rep-wheel-group">
@@ -4628,7 +4672,7 @@ function renderCircuit(){
           <textarea data-note="${i}" placeholder="Training notes">${row.trainingNotes||""}</textarea>
         </div>
       </div>
-      <button class="btn danger" data-remove="${i}">Remove</button>`;
+      <button class="btn danger circuit-remove" data-remove="${i}">Remove</button>`;
     d.addEventListener("dragstart",e=>{draggedIndex=i;d.classList.add("dragging");e.dataTransfer.effectAllowed="move";});
     d.addEventListener("dragend",()=>d.classList.remove("dragging"));
     d.addEventListener("dragover",e=>{e.preventDefault();e.dataTransfer.dropEffect="move";});
@@ -4843,6 +4887,8 @@ function renderSavedCircuits(){
   const list=el("savedCircuitsList");
   if(!list) return;
   list.innerHTML="";
+  const authHint=el("savedCircuitsAuthHint");
+  if(authHint) authHint.textContent=cloudUser ? "Saved circuits sync to this signed-in account." : "This device is in Guest mode. Sign in under Settings → Account to load saved circuits synced from your other devices.";
 
   const saved=circuits
     .filter(c=>c.savedForFuture)
@@ -5678,6 +5724,7 @@ function showView(name){
 
   // Keep Player synchronized with the most recently saved active circuit.
   if(name==="preferences") renderOfflineCacheStatus();
+  if(name==="importer") loadMediaHealthIssues();
   if(name==="player"){
     currentExercise=0;
     currentRound=1;
@@ -7357,6 +7404,7 @@ document.querySelectorAll(".tab[data-view]").forEach(t=>t.onclick=()=>{
   }
   showView(t.dataset.view);
 });
+if(el("refreshMediaHealth")) el("refreshMediaHealth").onclick=loadMediaHealthIssues;
 if(el("settingsMenuBtn")){
   el("settingsMenuBtn").onclick=e=>{
     e.stopPropagation();

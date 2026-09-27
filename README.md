@@ -32,3 +32,11 @@ Synchronized with web v6.10.18. Builder Smart Randomize now uses canonical ident
 - Primary nav order: Build, Programs, Player, Discover, Settings.
 - Player navigation and Launch Player use a yellow call-to-action treatment.
 - User-facing Builder exercise cards no longer expose canonical metadata and suppress generic General Training labels.
+
+## RC14 — Responsive Builder / Player + Media Health
+- Synced with web v6.10.20.
+- Current Circuit/Saved Circuits are primary across desktop, iPad, and iPhone; exercise library is secondary.
+- Fixes mobile Current Circuit field overflow and Player prescription/timer overlap.
+- Saved Circuits explains when Guest mode prevents account-synced circuits from appearing.
+- Smart Randomizer Preferences remain persistent and account-synced.
+- Admin Media Health queue reads the new Supabase media_health_issues table.
