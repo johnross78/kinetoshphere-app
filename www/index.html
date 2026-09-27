@@ -1315,7 +1315,7 @@ html[data-theme="light"] .provider-hero-media{background:rgba(23,32,42,.04)}
     <div>
       <div class="brand">
         <img class="brand-logo" id="brandLogo" src="assets/brand/orbit-lockup-dark.svg" alt="Kinetosphere" />
-        <span class="version-badge admin-only hidden" id="headerVersionBadge">v6.10.23</span>
+        <span class="version-badge admin-only hidden" id="headerVersionBadge">v6.10.24</span>
       </div>
       <div class="sub" id="subtitle"></div>
     </div>
@@ -1678,7 +1678,7 @@ html[data-theme="light"] .provider-hero-media{background:rgba(23,32,42,.04)}
   <section id="profileView" class="hidden"><div class="panel"><h2>Profile</h2><div class="meta">Profile identity, avatar, bio, and future social visibility controls will live here.</div></div></section>
   <section id="billingView" class="hidden"><div class="panel"><h2>Billing</h2><div class="meta">Kinetosphere subscription and provider-access billing controls will live here.</div></div></section>
   <section id="supportView" class="hidden"><div class="panel"><h2>Support</h2><div class="meta">Help, feedback, provider-access troubleshooting, and support requests will live here.</div></div></section>
-  <section id="aboutView" class="hidden"><div class="panel"><h2>About Kinetosphere</h2><div class="meta" style="margin-bottom:12px">Kinetosphere brings circuit building, provider programs, workout playback, and connected training libraries into one experience.</div><div class="notice"><strong>Current version:</strong> v6.10.23</div></div></section>
+  <section id="aboutView" class="hidden"><div class="panel"><h2>About Kinetosphere</h2><div class="meta" style="margin-bottom:12px">Kinetosphere brings circuit building, provider programs, workout playback, and connected training libraries into one experience.</div><div class="notice"><strong>Current version:</strong> v6.10.24</div></div></section>
 
   <section id="importerView" class="hidden">
     <div class="panel">
@@ -5742,6 +5742,7 @@ function showView(name){
   if(name==="importer" && !isAdminUser()){
     name="account";
   }
+  document.body.classList.toggle("player-active", name==="player");
   updateMobileNavActive(name);
   ["library","builder","programs","discover","providerDetail","account","preferences","profile","billing","support","about","importer","player"].forEach(v=>{
     el(v+"View").classList.toggle("hidden",v!==name);
@@ -5936,6 +5937,11 @@ const KINETOSPHERE_NATIVE=Boolean(
   window.location.protocol==="ionic:" ||
   !/^https?:$/.test(window.location.protocol)
 );
+
+function kinetosphereApiUrl(path){
+  const clean=String(path||"").startsWith("/") ? String(path||"") : "/"+String(path||"");
+  return KINETOSPHERE_NATIVE ? KINETOSPHERE_PUBLIC_ORIGIN+clean : clean;
+}
 
 // Native iOS YouTube bridge: keep YouTube embedded behind a real HTTPS Kinetosphere
 // origin so WKWebView does not trigger YouTube error 153.
@@ -6305,7 +6311,7 @@ async function getRapidSupportedMuscles(){
   if(rapidSupportedMuscles) return rapidSupportedMuscles;
   if(rapidSupportedPromise) return rapidSupportedPromise;
   rapidSupportedPromise=(async()=>{
-    const response=await fetch("/api/muscle-groups",{cache:"force-cache"});
+    const response=await fetch(kinetosphereApiUrl("/api/muscle-groups"),{cache:"force-cache"});
     if(!response.ok) throw new Error(`Muscle group API ${response.status}`);
     const data=await response.json();
     let list=[];
@@ -6412,20 +6418,22 @@ async function updateMuscleMap(ex){
       if(!attemptedPrimaryOnly && secondary.length){
         attemptedPrimaryOnly=true;
         status.textContent="Retrying muscle image…";
-        img.src="/api/muscle-image?"+primaryOnlyParams.toString();
+        img.src=kinetosphereApiUrl("/api/muscle-image?"+primaryOnlyParams.toString());
         return;
       }
       img.classList.add("hidden");
       status.classList.remove("hidden");
       status.textContent="Muscle image unavailable.";
     };
-    img.src="/api/muscle-image?"+params.toString();
+    img.src=kinetosphereApiUrl("/api/muscle-image?"+params.toString());
   }catch(err){
     if(token!==rapidMuscleRenderToken) return;
     console.warn("Muscle image error",err);
-    status.textContent=location.hostname==="127.0.0.1" || location.hostname==="localhost"
-      ? "RapidAPI muscle images require the deployed Cloudflare Worker."
-      : "Muscle image unavailable.";
+    status.textContent=KINETOSPHERE_NATIVE
+      ? "Muscle image service is temporarily unavailable."
+      : (location.hostname==="127.0.0.1" || location.hostname==="localhost"
+          ? "RapidAPI muscle images require the deployed Cloudflare Worker."
+          : "Muscle image unavailable.");
   }
 }
 
