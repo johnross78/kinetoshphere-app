@@ -1,8 +1,8 @@
 {
   "name": "kinetosphere-mobile",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "private": true,
-  "description": "Kinetosphere iOS TestFlight RC7 / build 6: hosted HTTPS YouTube bridge for inline iOS playback, synchronized with web v6.10.17.",
+  "description": "Kinetosphere iOS TestFlight RC9 / build 8: balanced Player cards, iPad safe-area header spacing, and final orbit app icon; synchronized with web v6.10.17.",
   "scripts": {
     "cap:sync": "npx cap sync",
     "cap:add:ios": "npx cap add ios",

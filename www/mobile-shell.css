@@ -116,3 +116,9 @@
   html[data-theme="light"] .mobile-network-status{background:rgba(255,255,255,.88)}
   .mobile-nav-btn.active{background:var(--surface-soft)}
 }
+
+
+/* RC9 native iPad chrome clearance. Phone safe-area rules above remain authoritative. */
+@media (min-width:761px){
+  html.native-capacitor-shell .global-sync-badge{top:calc(20px + env(safe-area-inset-top));}
+}

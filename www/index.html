@@ -3,6 +3,11 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<script>
+try {
+  if (!/^https?:$/.test(window.location.protocol)) document.documentElement.classList.add('native-capacitor-shell');
+} catch (e) {}
+</script>
 <title>Kinetosphere</title>
 <link rel="icon" href="assets/brand/orbit-app-icon.svg" type="image/svg+xml" />
 <script>
@@ -857,6 +862,13 @@ button[data-delete-saved]:hover{background:#e8b5b5 !important;}
 .player-progress-footer .metric .small{font-size:10px}
 .player-header-stack{min-width:0}
 @media(max-width:900px){.player-progress-footer{margin-top:9px}}
+
+/* iOS RC9 / TestFlight 1.0 (8): iPad shell + balanced Player columns */
+@media (min-width:761px){
+  html.native-capacitor-shell .app{padding-top:calc(26px + env(safe-area-inset-top));}
+}
+#playerView .workout-shell{align-items:stretch;}
+#playerView .video-card,#playerView .info-card{align-self:stretch;}
 
 /* v6.5.15 Movement Details readability */
 #modalBody{
