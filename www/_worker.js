@@ -4,7 +4,7 @@ const RAPID_BASE = "https://" + RAPID_HOST;
 function json(data, status=200, extraHeaders={}) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: {"Content-Type":"application/json; charset=utf-8", ...extraHeaders}
+    headers: {"Content-Type":"application/json; charset=utf-8", "Access-Control-Allow-Origin":"*", ...extraHeaders}
   });
 }
 
@@ -87,6 +87,15 @@ export default {
     const url = new URL(request.url);
 
 
+    if (request.method === "OPTIONS" && url.pathname.startsWith("/api/")) {
+      return new Response(null,{status:204,headers:{
+        "Access-Control-Allow-Origin":"*",
+        "Access-Control-Allow-Methods":"GET, OPTIONS",
+        "Access-Control-Allow-Headers":"Content-Type",
+        "Access-Control-Max-Age":"86400"
+      }});
+    }
+
     if (url.pathname === "/embed/youtube") {
       return youtubeEmbedPage(request.url);
     }
@@ -99,7 +108,8 @@ export default {
         headers:{
           "Content-Type":upstream.headers.get("Content-Type") || "application/json",
           "Cache-Control":"public, max-age=3600, s-maxage=86400",
-          "X-Content-Type-Options":"nosniff"
+          "X-Content-Type-Options":"nosniff",
+          "Access-Control-Allow-Origin":"*"
         }
       });
     }
@@ -154,7 +164,8 @@ export default {
           status:upstream.status,
           headers:{
             "Content-Type":upstream.headers.get("Content-Type") || "application/json",
-            "Cache-Control":"no-store"
+            "Cache-Control":"no-store",
+            "Access-Control-Allow-Origin":"*"
           }
         });
       }
@@ -164,7 +175,8 @@ export default {
         headers:{
           "Content-Type":upstream.headers.get("Content-Type") || "image/png",
           "Cache-Control":"public, max-age=86400, s-maxage=2592000",
-          "X-Content-Type-Options":"nosniff"
+          "X-Content-Type-Options":"nosniff",
+          "Access-Control-Allow-Origin":"*"
         }
       });
       ctx.waitUntil(cache.put(cacheKey, image.clone()));

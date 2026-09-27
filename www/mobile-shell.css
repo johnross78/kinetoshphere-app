@@ -251,3 +251,17 @@ html.native-capacitor-shell .app{
   html.native-capacitor-shell body.player-active #playerView .exercise-list .exercise-chip,
   html.native-capacitor-shell body.player-active #playerView .exercise-list>*{min-height:0;height:100%;overflow:hidden}
 }
+
+
+/* RC19: let exercise picker use the available viewport instead of ending mid-panel. */
+@media (min-width:761px){
+  #builderView .library-picker{
+    max-height:calc(100dvh - 285px)!important;
+    min-height:420px;
+    overscroll-behavior:contain;
+    -webkit-overflow-scrolling:touch;
+  }
+}
+@media (max-width:760px){
+  #builderView .library-picker{max-height:none!important;min-height:0;overflow:visible}
+}

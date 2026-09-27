@@ -1304,6 +1304,23 @@ html[data-theme="light"] .provider-hero-media{background:rgba(23,32,42,.04)}
 .program-provider-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 10px;padding:0 2px}
 .program-provider-heading h3{margin:0;font-size:20px}
 .program-provider-count{font-size:12px;font-weight:800;color:var(--muted);background:var(--panel2);border:1px solid var(--border);border-radius:999px;padding:4px 8px}
+
+/* v6.10.25 picker-height, About disclaimer, and native muscle-image reliability */
+#builderView .library-picker{
+  max-height:min(72dvh,calc(100dvh - 255px));
+  min-height:320px;
+  overscroll-behavior:contain;
+  scrollbar-gutter:stable;
+}
+.about-legal-disclaimer{margin-top:16px;padding:16px;border:1px solid var(--border);border-radius:14px;background:var(--surface-fainter);line-height:1.55}
+.about-legal-disclaimer h3{margin:0 0 10px;font-size:18px}
+.about-legal-disclaimer p{margin:0 0 10px;color:var(--text)}
+@media (min-width:1200px) and (min-height:760px){
+  #builderView .library-picker{max-height:calc(100dvh - 285px);min-height:440px}
+}
+@media (max-width:760px){
+  #builderView .library-picker{max-height:none;min-height:0;overflow:visible}
+}
 </style>
 <link rel="stylesheet" href="mobile-shell.css" />
 </head>
@@ -1315,7 +1332,7 @@ html[data-theme="light"] .provider-hero-media{background:rgba(23,32,42,.04)}
     <div>
       <div class="brand">
         <img class="brand-logo" id="brandLogo" src="assets/brand/orbit-lockup-dark.svg" alt="Kinetosphere" />
-        <span class="version-badge admin-only hidden" id="headerVersionBadge">v6.10.24</span>
+        <span class="version-badge admin-only hidden" id="headerVersionBadge">v6.10.25</span>
       </div>
       <div class="sub" id="subtitle"></div>
     </div>
@@ -1678,7 +1695,7 @@ html[data-theme="light"] .provider-hero-media{background:rgba(23,32,42,.04)}
   <section id="profileView" class="hidden"><div class="panel"><h2>Profile</h2><div class="meta">Profile identity, avatar, bio, and future social visibility controls will live here.</div></div></section>
   <section id="billingView" class="hidden"><div class="panel"><h2>Billing</h2><div class="meta">Kinetosphere subscription and provider-access billing controls will live here.</div></div></section>
   <section id="supportView" class="hidden"><div class="panel"><h2>Support</h2><div class="meta">Help, feedback, provider-access troubleshooting, and support requests will live here.</div></div></section>
-  <section id="aboutView" class="hidden"><div class="panel"><h2>About Kinetosphere</h2><div class="meta" style="margin-bottom:12px">Kinetosphere brings circuit building, provider programs, workout playback, and connected training libraries into one experience.</div><div class="notice"><strong>Current version:</strong> v6.10.24</div></div></section>
+  <section id="aboutView" class="hidden"><div class="panel"><h2>About Kinetosphere</h2><div class="meta" style="margin-bottom:12px">Kinetosphere brings circuit building, provider programs, workout playback, and connected training libraries into one experience.</div><div class="notice"><strong>Current version:</strong> v6.10.25</div><div class="about-legal-disclaimer"><h3>Exercise &amp; Health Disclaimer</h3><p>Kinetosphere provides exercise and fitness information for general educational purposes only. It is not medical advice and is not a substitute for evaluation, diagnosis, or treatment by a qualified healthcare professional.</p><p>Exercise involves inherent risks, including the risk of injury. You are responsible for determining whether an exercise or program is appropriate for you, using suitable equipment and technique, and stopping if you experience pain, dizziness, unusual shortness of breath, or other concerning symptoms. Consult an appropriate healthcare professional before beginning or changing an exercise program if you have a medical condition, injury, are pregnant, or have other health concerns.</p><p>Content from independent providers reflects those providers’ guidance. Kinetosphere does not guarantee results or that any exercise, program, or provider content is suitable or safe for every person. By choosing to participate, you accept responsibility for your own exercise decisions and participation.</p><div class="meta">Interim legal language — to be reviewed by counsel before commercial launch.</div></div></div></section>
 
   <section id="importerView" class="hidden">
     <div class="panel">
@@ -6306,9 +6323,18 @@ const RAPID_MUSCLE_CANDIDATES={
 
 let rapidSupportedMuscles=null;
 let rapidSupportedPromise=null;
+const RAPID_NATIVE_SUPPORTED_MUSCLES=new Set(
+  Object.values(RAPID_MUSCLE_CANDIDATES).flat().filter(Boolean)
+);
 
 async function getRapidSupportedMuscles(){
   if(rapidSupportedMuscles) return rapidSupportedMuscles;
+  // Capacitor runs from a non-HTTPS app origin. Avoid making muscle rendering depend
+  // on a CORS-sensitive metadata fetch; the image itself can load from our HTTPS Worker.
+  if(KINETOSPHERE_NATIVE){
+    rapidSupportedMuscles=RAPID_NATIVE_SUPPORTED_MUSCLES;
+    return rapidSupportedMuscles;
+  }
   if(rapidSupportedPromise) return rapidSupportedPromise;
   rapidSupportedPromise=(async()=>{
     const response=await fetch(kinetosphereApiUrl("/api/muscle-groups"),{cache:"force-cache"});
