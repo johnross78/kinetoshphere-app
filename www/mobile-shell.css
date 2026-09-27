@@ -265,3 +265,108 @@ html.native-capacitor-shell .app{
 @media (max-width:760px){
   #builderView .library-picker{max-height:none!important;min-height:0;overflow:visible}
 }
+
+/* RC21: authoritative native-landscape Player geometry.
+   The media card owns 16:9; the page may scroll vertically when a phone landscape
+   viewport is too short to contain title + stage + movement strip. */
+@media (orientation: landscape) and (max-height: 1050px){
+  html.native-capacitor-shell body.player-active,
+  html.native-capacitor-shell body.player-active .app{
+    height:auto!important;
+    min-height:100dvh!important;
+    overflow-x:hidden!important;
+    overflow-y:auto!important;
+  }
+  html.native-capacitor-shell body.player-active .app{
+    display:flex!important;
+    flex-direction:column!important;
+  }
+  html.native-capacitor-shell body.player-active #playerView{
+    display:block!important;
+    flex:0 0 auto!important;
+    min-height:0!important;
+    overflow:visible!important;
+  }
+  html.native-capacitor-shell body.player-active #playerArea{
+    display:flex!important;
+    flex-direction:column!important;
+    flex:0 0 auto!important;
+    min-height:0!important;
+    overflow:visible!important;
+  }
+  html.native-capacitor-shell body.player-active #playerView .workout-shell{
+    display:grid!important;
+    grid-template-columns:minmax(0,2fr) minmax(280px,1fr)!important;
+    align-items:start!important;
+    height:auto!important;
+    min-height:0!important;
+    overflow:visible!important;
+    gap:7px!important;
+  }
+  html.native-capacitor-shell body.player-active #playerView .video-card{
+    display:block!important;
+    width:100%!important;
+    max-width:none!important;
+    height:auto!important;
+    min-height:0!important;
+    max-height:none!important;
+    aspect-ratio:16/9!important;
+    align-self:start!important;
+    overflow:hidden!important;
+  }
+  html.native-capacitor-shell body.player-active #playerView .video-wrap{
+    position:relative!important;
+    width:100%!important;
+    height:100%!important;
+    aspect-ratio:auto!important;
+    min-height:0!important;
+    overflow:hidden!important;
+    background:#000!important;
+  }
+  html.native-capacitor-shell body.player-active #playerView #ytFrame,
+  html.native-capacitor-shell body.player-active #playerView #streamFrame,
+  html.native-capacitor-shell body.player-active #playerView #offlineVideoFrame{
+    position:absolute!important;
+    inset:0!important;
+    display:block!important;
+    width:100%!important;
+    height:100%!important;
+    max-width:none!important;
+    max-height:none!important;
+    object-fit:contain!important;
+  }
+  html.native-capacitor-shell body.player-active #playerView .info-card{
+    width:100%!important;
+    min-width:0!important;
+    align-self:start!important;
+    overflow-y:auto!important;
+    overscroll-behavior:contain!important;
+  }
+  html.native-capacitor-shell body.player-active #playerView .strip{
+    flex:0 0 auto!important;
+    height:clamp(88px,17vh,118px)!important;
+    min-height:88px!important;
+    overflow:hidden!important;
+  }
+}
+
+/* iPhone landscape: give controls enough width, but never lock the page to one screen. */
+@media (orientation: landscape) and (max-width:950px) and (max-height:600px){
+  html.native-capacitor-shell body.player-active #playerView .workout-shell{
+    grid-template-columns:minmax(0,3fr) minmax(250px,2fr)!important;
+  }
+  html.native-capacitor-shell body.player-active #playerView .video-card{
+    width:100%!important;
+    max-width:none!important;
+    height:auto!important;
+    aspect-ratio:16/9!important;
+  }
+  html.native-capacitor-shell body.player-active #playerView .info-card{
+    min-width:0!important;
+    padding:6px 7px!important;
+  }
+  html.native-capacitor-shell body.player-active #playerView .strip{
+    height:92px!important;
+    min-height:92px!important;
+  }
+}
