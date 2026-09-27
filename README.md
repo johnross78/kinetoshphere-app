@@ -33,8 +33,11 @@ Synchronized with web v6.10.18. Builder Smart Randomize now uses canonical ident
 - Player navigation and Launch Player use a yellow call-to-action treatment.
 - User-facing Builder exercise cards no longer expose canonical metadata and suppress generic General Training labels.
 
-## RC15 — Player Lifecycle + Provider Programs + Matched Player Cards
-- Synced with web v6.10.21.
+## RC16 — Landscape Player + Prescription Precedence + YouTube Bridge Recovery
+- Synced with web v6.10.22.
+- Restores the hosted HTTPS YouTube bridge on native iOS to prevent error 153.
+- Adds short-landscape iPhone Player geometry.
+- Enforces prescription precedence so rep prescriptions do not inherit stale timers.
 - Current Circuit/Saved Circuits are primary across desktop, iPad, and iPhone; exercise library is secondary.
 - Fixes mobile Current Circuit field overflow and Player prescription/timer overlap.
 - Saved Circuits explains when Guest mode prevents account-synced circuits from appearing.

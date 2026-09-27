@@ -1308,7 +1308,7 @@ html[data-theme="light"] .provider-hero-media{background:rgba(23,32,42,.04)}
     <div>
       <div class="brand">
         <img class="brand-logo" id="brandLogo" src="assets/brand/orbit-lockup-dark.svg" alt="Kinetosphere" />
-        <span class="version-badge admin-only hidden" id="headerVersionBadge">v6.10.21</span>
+        <span class="version-badge admin-only hidden" id="headerVersionBadge">v6.10.22</span>
       </div>
       <div class="sub" id="subtitle"></div>
     </div>
@@ -1671,7 +1671,7 @@ html[data-theme="light"] .provider-hero-media{background:rgba(23,32,42,.04)}
   <section id="profileView" class="hidden"><div class="panel"><h2>Profile</h2><div class="meta">Profile identity, avatar, bio, and future social visibility controls will live here.</div></div></section>
   <section id="billingView" class="hidden"><div class="panel"><h2>Billing</h2><div class="meta">Kinetosphere subscription and provider-access billing controls will live here.</div></div></section>
   <section id="supportView" class="hidden"><div class="panel"><h2>Support</h2><div class="meta">Help, feedback, provider-access troubleshooting, and support requests will live here.</div></div></section>
-  <section id="aboutView" class="hidden"><div class="panel"><h2>About Kinetosphere</h2><div class="meta" style="margin-bottom:12px">Kinetosphere brings circuit building, provider programs, workout playback, and connected training libraries into one experience.</div><div class="notice"><strong>Current version:</strong> v6.10.21</div></div></section>
+  <section id="aboutView" class="hidden"><div class="panel"><h2>About Kinetosphere</h2><div class="meta" style="margin-bottom:12px">Kinetosphere brings circuit building, provider programs, workout playback, and connected training libraries into one experience.</div><div class="notice"><strong>Current version:</strong> v6.10.22</div></div></section>
 
   <section id="importerView" class="hidden">
     <div class="panel">
@@ -3485,16 +3485,23 @@ function movementTypePrescriptionDefaults(ex){
 
 function effectiveExerciseDefaults(ex){
   const fallback=movementTypePrescriptionDefaults(ex);
+  const explicitType=String(ex?.prescriptionType||"").toLowerCase();
+  const hasSpecificType=explicitType && explicitType!=="manual";
+  const resolvedType=hasSpecificType ? explicitType : fallback.prescriptionType;
 
-  const hasSpecificType=ex.prescriptionType && ex.prescriptionType!=="manual";
-  const hasTimedMode=ex.mode==="timed";
+  // Prescription is authoritative. Rep/per-side/distance prescriptions must never
+  // inherit a stale movement-type timer. A timed prescription owns the timer.
+  // Explicit Builder edits update prescriptionType/mode and therefore win here too.
+  const isTimed=resolvedType==="timed";
+  const explicitSeconds=Number(ex?.seconds||prescriptionSecondsFromText(ex?.prescription)||0);
+  const timedSeconds=isTimed ? (explicitSeconds || Number(ex?.defaultAmount||0) || fallback.seconds || null) : null;
 
   return {
-    prescriptionType:hasSpecificType ? ex.prescriptionType : fallback.prescriptionType,
-    defaultAmount:ex.defaultAmount || fallback.defaultAmount,
-    prescription:ex.prescription || fallback.prescription,
-    mode:hasTimedMode ? "timed" : fallback.mode,
-    seconds:ex.seconds || fallback.seconds || null
+    prescriptionType:resolvedType,
+    defaultAmount:ex?.defaultAmount || fallback.defaultAmount,
+    prescription:ex?.prescription || fallback.prescription,
+    mode:isTimed ? "timed" : "manual",
+    seconds:timedSeconds
   };
 }
 
@@ -5903,6 +5910,51 @@ function getActiveItems(){
 let ytPlayer=null;
 let ytPlayerReady=false;
 let pendingVideoId=null;
+const KINETOSPHERE_PUBLIC_ORIGIN="https://circuitbuilder.rosshomegym.com";
+const KINETOSPHERE_NATIVE=Boolean(
+  window.Capacitor?.isNativePlatform?.() ||
+  window.location.protocol==="capacitor:" ||
+  window.location.protocol==="ionic:" ||
+  !/^https?:$/.test(window.location.protocol)
+);
+
+// Native iOS YouTube bridge: keep YouTube embedded behind a real HTTPS Kinetosphere
+// origin so WKWebView does not trigger YouTube error 153.
+let hostedYoutubeVideoId="";
+function hostedYoutubeFrame(){
+  return document.querySelector("#ytFrame iframe[data-kinetosphere-youtube-bridge]");
+}
+function hostedYoutubePost(type,extra={}){
+  const frame=hostedYoutubeFrame();
+  if(!frame || !frame.contentWindow) return;
+  try{ frame.contentWindow.postMessage({source:"kinetosphere-parent",type,...extra},KINETOSPHERE_PUBLIC_ORIGIN); }catch(e){}
+}
+function loadHostedYoutubeBridge(videoId){
+  const host=el("ytFrame");
+  if(!host || !videoId) return false;
+  const muted=gymVideoAudioMuted?"1":"0";
+  const src=`${KINETOSPHERE_PUBLIC_ORIGIN}/embed/youtube?id=${encodeURIComponent(videoId)}&muted=${muted}`;
+  if(hostedYoutubeVideoId!==videoId || !hostedYoutubeFrame()){
+    host.innerHTML=`<iframe data-kinetosphere-youtube-bridge title="Exercise demonstration" src="${src}" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin" style="width:100%;height:100%;display:block"></iframe>`;
+    hostedYoutubeVideoId=videoId;
+  }else{
+    hostedYoutubePost("load",{videoId});
+    hostedYoutubePost(gymVideoAudioMuted?"mute":"unmute");
+    hostedYoutubePost("play");
+  }
+  return true;
+}
+function stopHostedYoutubeBridge(){
+  const host=el("ytFrame");
+  if(host && hostedYoutubeFrame()) host.innerHTML="";
+  hostedYoutubeVideoId="";
+}
+window.addEventListener("message",(event)=>{
+  if(event.origin!==KINETOSPHERE_PUBLIC_ORIGIN) return;
+  const msg=event.data||{};
+  if(msg.source==="kinetosphere-youtube" && msg.type==="error") console.warn("Hosted YouTube bridge error",msg.data);
+});
+
 let initialVideoLoaded=false;
 let ytRetryTimer=null;
 
@@ -6019,6 +6071,7 @@ function updateGymVideoAudioButton(){
   btn.classList.toggle("secondary",gymVideoAudioMuted);
 }
 function applyGymAudioToYouTube(){
+  if(KINETOSPHERE_NATIVE && hostedYoutubeFrame()){ hostedYoutubePost(gymVideoAudioMuted?"mute":"unmute"); return; }
   if(!ytPlayerReady || !ytPlayer) return;
   try{
     // v6.10.17: true provider mute. Countdown/workout cues now use a separate
@@ -6083,6 +6136,11 @@ function showYouTubeMovementVideo(videoId){
   if(activeVideoProvider==="cloudflare_stream") stopHostedMovementVideo();
   if(yt) yt.classList.remove("hidden");
   activeVideoProvider="youtube";
+  if(KINETOSPHERE_NATIVE && loadHostedYoutubeBridge(videoId)){
+    scheduleGymAudioForYouTube();
+    updateGymVideoAudioButton();
+    return;
+  }
   loadMovementVideo(videoId);
   scheduleGymAudioForYouTube();
   updateGymVideoAudioButton();
@@ -6090,6 +6148,7 @@ function showYouTubeMovementVideo(videoId){
 
 function showHostedMovementVideo(videoId,loopUntilAdvance=true,muted=false){
   stopOfflineMovementVideo();
+  if(KINETOSPHERE_NATIVE) stopHostedYoutubeBridge();
   const frame=el("streamFrame");
   const yt=el("ytFrame");
   if(!frame || !videoId) return;
@@ -6138,6 +6197,7 @@ function loadExerciseVideo(ex){
 function stopAllMovementVideo(){
   stopOfflineMovementVideo();
   stopHostedMovementVideo();
+  if(KINETOSPHERE_NATIVE) stopHostedYoutubeBridge();
   const yt=el("ytFrame");
   if(yt) yt.classList.remove("hidden");
   if(ytPlayerReady && ytPlayer){ try{ ytPlayer.stopVideo(); }catch(e){} }
@@ -6166,7 +6226,8 @@ function syncPlayerCardHeights(){
   const video=el("playerArea")?.querySelector(".video-card");
   const info=el("infoCard");
   if(!video||!info) return;
-  if(window.innerWidth<760){ info.style.height=""; info.style.maxHeight=""; return; }
+  const shortLandscape=window.matchMedia?.("(orientation: landscape) and (max-height: 600px) and (max-width: 950px)")?.matches;
+  if(window.innerWidth<760 && !shortLandscape){ info.style.height=""; info.style.maxHeight=""; return; }
   requestAnimationFrame(()=>{
     const h=Math.round(video.getBoundingClientRect().height);
     if(h>0){ info.style.height=`${h}px`; info.style.maxHeight=`${h}px`; }
@@ -6409,8 +6470,11 @@ function renderPlayer(){
   el("descriptionBtn").style.display=cleanedExerciseDescription(ex)?"inline-block":"none";
   const explicitTimerMode=String(ex.timerMode||"").toLowerCase();
   const prescriptionType=String(ex.prescriptionType||"").toLowerCase();
+  const explicitRepType=["reps","per_side","distance"].includes(prescriptionType);
   const prescribedSeconds=Number(ex.seconds||prescriptionSecondsFromText(resolvedPrescription)||0);
-  const timed=["countdown","amrap","emom"].includes(explicitTimerMode) || prescriptionType==="timed" || (ex.mode==="timed" && prescribedSeconds>0);
+  // An explicit user timer mode wins. Otherwise the prescription type is authoritative:
+  // reps/per-side/distance suppress stale timer metadata; timed prescriptions enable it.
+  const timed=["countdown","amrap","emom"].includes(explicitTimerMode) || (!explicitRepType && (prescriptionType==="timed" || (ex.mode==="timed" && prescribedSeconds>0)));
   el("infoCard").classList.toggle("timed-mode",timed);
   const modeLabel=el("timerModeLabel");
   if(modeLabel){
