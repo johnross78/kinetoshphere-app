@@ -68,3 +68,5 @@ RC19 reliability notes:
 - Hosted YouTube bridge iframe is pinned to the full centered media surface.
 - Programs / Flows provider sections can be expanded or collapsed; state is remembered for the current app session.
 - Web Player geometry remains unchanged.
+
+RC22 / v6.10.28: iPad-only Player header restoration. Native iPad landscape now retains the Kinetosphere logo and normal-size, right-aligned top navigation while iPhone keeps the compact landscape header. Player geometry from RC21 is unchanged.
