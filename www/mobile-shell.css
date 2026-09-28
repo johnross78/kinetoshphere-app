@@ -422,3 +422,113 @@ html.native-capacitor-shell .app{
     white-space:nowrap!important;
   }
 }
+
+/* RC23: iPad Player header must exactly match the normal Builder header. */
+html.native-capacitor-shell.native-ipad-shell body.player-active .topbar{
+  display:flex!important;
+  justify-content:space-between!important;
+  align-items:center!important;
+  gap:12px!important;
+  min-height:0!important;
+  margin:0 0 12px!important;
+  padding:0!important;
+  background:transparent!important;
+  border:0!important;
+  backdrop-filter:none!important;
+}
+html.native-capacitor-shell.native-ipad-shell body.player-active .topbar>div:first-child{
+  display:block!important;
+  flex:0 1 auto!important;
+  min-width:0!important;
+}
+html.native-capacitor-shell.native-ipad-shell body.player-active .brand{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  gap:10px!important;
+  min-width:0!important;
+}
+html.native-capacitor-shell.native-ipad-shell body.player-active .brand-logo{
+  display:block!important;
+  width:auto!important;
+  height:50px!important;
+  max-width:none!important;
+}
+html.native-capacitor-shell.native-ipad-shell body.player-active .topbar>.tabs{
+  display:flex!important;
+  flex:0 0 auto!important;
+  justify-content:flex-end!important;
+  align-items:center!important;
+  gap:8px!important;
+  flex-wrap:wrap!important;
+  overflow:visible!important;
+  padding:0!important;
+}
+html.native-capacitor-shell.native-ipad-shell body.player-active .topbar .tab{
+  min-height:0!important;
+  height:auto!important;
+  padding:12px 16px!important;
+  border-radius:12px!important;
+  font-size:inherit!important;
+  line-height:normal!important;
+  white-space:nowrap!important;
+}
+
+/* RC23: portrait phone Player must release landscape card-height constraints. */
+@media (orientation:portrait) and (max-width:760px){
+  html.native-capacitor-shell body.player-active #playerView .info-card{
+    height:auto!important;
+    max-height:none!important;
+    overflow:visible!important;
+  }
+  html.native-capacitor-shell body.player-active #playerView .prescription-timer-row{
+    position:relative!important;
+    inset:auto!important;
+    transform:none!important;
+    margin:8px 0 7px!important;
+    min-height:66px!important;
+    z-index:auto!important;
+  }
+  html.native-capacitor-shell body.player-active #playerView .info-card:not(.timed-mode) .timer{
+    position:static!important;
+    transform:none!important;
+    margin:0!important;
+    font-size:clamp(44px,14vw,68px)!important;
+    line-height:1!important;
+  }
+  html.native-capacitor-shell body.player-active #playerView .controls{
+    position:static!important;
+    inset:auto!important;
+    transform:none!important;
+    margin:8px 0 0!important;
+  }
+  html.native-capacitor-shell body.player-active #playerView .strip{
+    position:relative!important;
+    z-index:0!important;
+    margin-top:10px!important;
+  }
+}
+
+/* RC23: keep the native iPhone landscape YouTube host centered and edge-to-edge. */
+@media (orientation:landscape) and (max-width:950px) and (max-height:600px){
+  html.native-capacitor-shell body.player-active #playerView .video-wrap,
+  html.native-capacitor-shell body.player-active #playerView #ytFrame,
+  html.native-capacitor-shell body.player-active #playerView #streamFrame,
+  html.native-capacitor-shell body.player-active #playerView #offlineVideoFrame,
+  html.native-capacitor-shell body.player-active #playerView #ytFrame>iframe[data-kinetosphere-youtube-bridge]{
+    position:absolute!important;
+    inset:0!important;
+    left:0!important;
+    right:0!important;
+    top:0!important;
+    bottom:0!important;
+    margin:0!important;
+    padding:0!important;
+    width:100%!important;
+    height:100%!important;
+    max-width:none!important;
+    max-height:none!important;
+    transform:none!important;
+    display:block!important;
+  }
+}

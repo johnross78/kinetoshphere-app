@@ -5,7 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <script>
 try {
-  if (!/^https?:$/.test(window.location.protocol)) document.documentElement.classList.add('native-capacitor-shell');
+  if (!/^https?:$/.test(window.location.protocol)) {
+    document.documentElement.classList.add('native-capacitor-shell');
+    const ua=navigator.userAgent||'';
+    const platform=navigator.platform||'';
+    const isIPad=/iPad/.test(ua) || (platform==='MacIntel' && navigator.maxTouchPoints>1);
+    if(isIPad) document.documentElement.classList.add('native-ipad-shell');
+  }
 } catch (e) {}
 </script>
 <title>Kinetosphere</title>
@@ -1305,7 +1311,7 @@ html[data-theme="light"] .provider-hero-media{background:rgba(23,32,42,.04)}
 .program-provider-heading h3{margin:0;font-size:20px}
 .program-provider-count{font-size:12px;font-weight:800;color:var(--muted);background:var(--panel2);border:1px solid var(--border);border-radius:999px;padding:4px 8px}
 
-/* v6.10.28 picker-height, About disclaimer, and native muscle-image reliability */
+/* v6.10.29 picker-height, About disclaimer, and native muscle-image reliability */
 #builderView .library-picker{
   max-height:min(72dvh,calc(100dvh - 255px));
   min-height:320px;
@@ -1322,7 +1328,7 @@ html[data-theme="light"] .provider-hero-media{background:rgba(23,32,42,.04)}
   #builderView .library-picker{max-height:none;min-height:0;overflow:visible}
 }
 
-/* v6.10.28 / RC20 — native Player geometry: media frame owns a strict 16:9 ratio. */
+/* v6.10.29 / RC20 — native Player geometry: media frame owns a strict 16:9 ratio. */
 .program-provider-heading-main{display:flex;align-items:center;gap:9px;min-width:0}
 .program-provider-toggle{border:1px solid var(--border);background:var(--panel2);color:var(--text);border-radius:10px;padding:7px 10px;font:inherit;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap}
 .program-provider-toggle:hover{border-color:var(--accent)}
@@ -1368,7 +1374,7 @@ html[data-theme="light"] .provider-hero-media{background:rgba(23,32,42,.04)}
     <div>
       <div class="brand">
         <img class="brand-logo" id="brandLogo" src="assets/brand/orbit-lockup-dark.svg" alt="Kinetosphere" />
-        <span class="version-badge admin-only hidden" id="headerVersionBadge">v6.10.28</span>
+        <span class="version-badge admin-only hidden" id="headerVersionBadge">v6.10.29</span>
       </div>
       <div class="sub" id="subtitle"></div>
     </div>
@@ -1731,7 +1737,7 @@ html[data-theme="light"] .provider-hero-media{background:rgba(23,32,42,.04)}
   <section id="profileView" class="hidden"><div class="panel"><h2>Profile</h2><div class="meta">Profile identity, avatar, bio, and future social visibility controls will live here.</div></div></section>
   <section id="billingView" class="hidden"><div class="panel"><h2>Billing</h2><div class="meta">Kinetosphere subscription and provider-access billing controls will live here.</div></div></section>
   <section id="supportView" class="hidden"><div class="panel"><h2>Support</h2><div class="meta">Help, feedback, provider-access troubleshooting, and support requests will live here.</div></div></section>
-  <section id="aboutView" class="hidden"><div class="panel"><h2>About Kinetosphere</h2><div class="meta" style="margin-bottom:12px">Kinetosphere brings circuit building, provider programs, workout playback, and connected training libraries into one experience.</div><div class="notice"><strong>Current version:</strong> v6.10.28</div><div class="about-legal-disclaimer"><h3>Exercise &amp; Health Disclaimer</h3><p>Kinetosphere provides exercise and fitness information for general educational purposes only. It is not medical advice and is not a substitute for evaluation, diagnosis, or treatment by a qualified healthcare professional.</p><p>Exercise involves inherent risks, including the risk of injury. You are responsible for determining whether an exercise or program is appropriate for you, using suitable equipment and technique, and stopping if you experience pain, dizziness, unusual shortness of breath, or other concerning symptoms. Consult an appropriate healthcare professional before beginning or changing an exercise program if you have a medical condition, injury, are pregnant, or have other health concerns.</p><p>Content from independent providers reflects those providers’ guidance. Kinetosphere does not guarantee results or that any exercise, program, or provider content is suitable or safe for every person. By choosing to participate, you accept responsibility for your own exercise decisions and participation.</p><div class="meta">Interim legal language — to be reviewed by counsel before commercial launch.</div></div></div></section>
+  <section id="aboutView" class="hidden"><div class="panel"><h2>About Kinetosphere</h2><div class="meta" style="margin-bottom:12px">Kinetosphere brings circuit building, provider programs, workout playback, and connected training libraries into one experience.</div><div class="notice"><strong>Current version:</strong> v6.10.29</div><div class="about-legal-disclaimer"><h3>Exercise &amp; Health Disclaimer</h3><p>Kinetosphere provides exercise and fitness information for general educational purposes only. It is not medical advice and is not a substitute for evaluation, diagnosis, or treatment by a qualified healthcare professional.</p><p>Exercise involves inherent risks, including the risk of injury. You are responsible for determining whether an exercise or program is appropriate for you, using suitable equipment and technique, and stopping if you experience pain, dizziness, unusual shortness of breath, or other concerning symptoms. Consult an appropriate healthcare professional before beginning or changing an exercise program if you have a medical condition, injury, are pregnant, or have other health concerns.</p><p>Content from independent providers reflects those providers’ guidance. Kinetosphere does not guarantee results or that any exercise, program, or provider content is suitable or safe for every person. By choosing to participate, you accept responsibility for your own exercise decisions and participation.</p><div class="meta">Interim legal language — to be reviewed by counsel before commercial launch.</div></div></div></section>
 
   <section id="importerView" class="hidden">
     <div class="panel">
@@ -6312,8 +6318,13 @@ function syncPlayerCardHeights(){
   const video=el("playerArea")?.querySelector(".video-card");
   const info=el("infoCard");
   if(!video||!info) return;
+  const landscape=window.matchMedia?.("(orientation: landscape)")?.matches;
   const shortLandscape=window.matchMedia?.("(orientation: landscape) and (max-height: 600px) and (max-width: 950px)")?.matches;
-  if(window.innerWidth<760 && !shortLandscape){ info.style.removeProperty("height"); info.style.removeProperty("max-height"); return; }
+  if(!landscape || (window.innerWidth<760 && !shortLandscape)){
+    info.style.removeProperty("height");
+    info.style.removeProperty("max-height");
+    return;
+  }
   requestAnimationFrame(()=>{
     const h=Math.round(video.getBoundingClientRect().height);
     if(h>0){ info.style.setProperty("height",`${h}px`,"important"); info.style.setProperty("max-height",`${h}px`,"important"); }

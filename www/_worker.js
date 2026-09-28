@@ -54,11 +54,16 @@ let player=null;
 function send(type,data){try{parent.postMessage({source:'kinetosphere-youtube',type,data:data||null},'*')}catch(e){}}
 window.onYouTubeIframeAPIReady=function(){
  player=new YT.Player('player',{width:'100%',height:'100%',videoId:VIDEO_ID,playerVars:{autoplay:1,playsinline:1,rel:0,loop:1,playlist:VIDEO_ID,origin:EMBED_ORIGIN,widget_referrer:EMBED_ORIGIN},events:{
-  onReady:function(e){try{if(START_MUTED)e.target.mute();else e.target.unMute();e.target.playVideo()}catch(_){} send('ready')},
+  onReady:function(e){try{if(START_MUTED)e.target.mute();else e.target.unMute();syncPlayerSize();e.target.playVideo()}catch(_){} send('ready')},
   onStateChange:function(e){if(e.data===YT.PlayerState.ENDED){try{e.target.seekTo(0,true);e.target.playVideo()}catch(_){}}},
   onError:function(e){send('error',e.data)}
  }});
 };
+function syncPlayerSize(){
+ try{if(player&&player.setSize)player.setSize(window.innerWidth,window.innerHeight)}catch(_){}
+}
+window.addEventListener('resize',function(){setTimeout(syncPlayerSize,0)});
+window.addEventListener('orientationchange',function(){setTimeout(syncPlayerSize,120);setTimeout(syncPlayerSize,420)});
 window.addEventListener('message',function(ev){
  const m=ev.data||{}; if(m.source!=='kinetosphere-parent'||!player)return;
  try{

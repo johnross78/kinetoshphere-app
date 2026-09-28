@@ -70,3 +70,5 @@ RC19 reliability notes:
 - Web Player geometry remains unchanged.
 
 RC22 / v6.10.28: iPad-only Player header restoration. Native iPad landscape now retains the Kinetosphere logo and normal-size, right-aligned top navigation while iPhone keeps the compact landscape header. Player geometry from RC21 is unchanged.
+
+RC23 / v6.10.29: iPad Player header now uses the exact normal Builder header geometry. Portrait iPhone explicitly releases landscape card-height constraints so prescription and controls remain inside the info card. Hosted YouTube bridge now resizes its internal player on orientation/viewport changes to prevent shifted/pillarboxed native landscape rendering.
