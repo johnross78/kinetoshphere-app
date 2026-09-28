@@ -1311,7 +1311,7 @@ html[data-theme="light"] .provider-hero-media{background:rgba(23,32,42,.04)}
 .program-provider-heading h3{margin:0;font-size:20px}
 .program-provider-count{font-size:12px;font-weight:800;color:var(--muted);background:var(--panel2);border:1px solid var(--border);border-radius:999px;padding:4px 8px}
 
-/* v6.10.29 picker-height, About disclaimer, and native muscle-image reliability */
+/* v6.10.30 picker-height, About disclaimer, and native muscle-image reliability */
 #builderView .library-picker{
   max-height:min(72dvh,calc(100dvh - 255px));
   min-height:320px;
@@ -1328,7 +1328,7 @@ html[data-theme="light"] .provider-hero-media{background:rgba(23,32,42,.04)}
   #builderView .library-picker{max-height:none;min-height:0;overflow:visible}
 }
 
-/* v6.10.29 / RC20 — native Player geometry: media frame owns a strict 16:9 ratio. */
+/* v6.10.30 / RC20 — native Player geometry: media frame owns a strict 16:9 ratio. */
 .program-provider-heading-main{display:flex;align-items:center;gap:9px;min-width:0}
 .program-provider-toggle{border:1px solid var(--border);background:var(--panel2);color:var(--text);border-radius:10px;padding:7px 10px;font:inherit;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap}
 .program-provider-toggle:hover{border-color:var(--accent)}
@@ -1374,7 +1374,7 @@ html[data-theme="light"] .provider-hero-media{background:rgba(23,32,42,.04)}
     <div>
       <div class="brand">
         <img class="brand-logo" id="brandLogo" src="assets/brand/orbit-lockup-dark.svg" alt="Kinetosphere" />
-        <span class="version-badge admin-only hidden" id="headerVersionBadge">v6.10.29</span>
+        <span class="version-badge admin-only hidden" id="headerVersionBadge">v6.10.30</span>
       </div>
       <div class="sub" id="subtitle"></div>
     </div>
@@ -1737,7 +1737,7 @@ html[data-theme="light"] .provider-hero-media{background:rgba(23,32,42,.04)}
   <section id="profileView" class="hidden"><div class="panel"><h2>Profile</h2><div class="meta">Profile identity, avatar, bio, and future social visibility controls will live here.</div></div></section>
   <section id="billingView" class="hidden"><div class="panel"><h2>Billing</h2><div class="meta">Kinetosphere subscription and provider-access billing controls will live here.</div></div></section>
   <section id="supportView" class="hidden"><div class="panel"><h2>Support</h2><div class="meta">Help, feedback, provider-access troubleshooting, and support requests will live here.</div></div></section>
-  <section id="aboutView" class="hidden"><div class="panel"><h2>About Kinetosphere</h2><div class="meta" style="margin-bottom:12px">Kinetosphere brings circuit building, provider programs, workout playback, and connected training libraries into one experience.</div><div class="notice"><strong>Current version:</strong> v6.10.29</div><div class="about-legal-disclaimer"><h3>Exercise &amp; Health Disclaimer</h3><p>Kinetosphere provides exercise and fitness information for general educational purposes only. It is not medical advice and is not a substitute for evaluation, diagnosis, or treatment by a qualified healthcare professional.</p><p>Exercise involves inherent risks, including the risk of injury. You are responsible for determining whether an exercise or program is appropriate for you, using suitable equipment and technique, and stopping if you experience pain, dizziness, unusual shortness of breath, or other concerning symptoms. Consult an appropriate healthcare professional before beginning or changing an exercise program if you have a medical condition, injury, are pregnant, or have other health concerns.</p><p>Content from independent providers reflects those providers’ guidance. Kinetosphere does not guarantee results or that any exercise, program, or provider content is suitable or safe for every person. By choosing to participate, you accept responsibility for your own exercise decisions and participation.</p><div class="meta">Interim legal language — to be reviewed by counsel before commercial launch.</div></div></div></section>
+  <section id="aboutView" class="hidden"><div class="panel"><h2>About Kinetosphere</h2><div class="meta" style="margin-bottom:12px">Kinetosphere brings circuit building, provider programs, workout playback, and connected training libraries into one experience.</div><div class="notice"><strong>Current version:</strong> v6.10.30</div><div class="about-legal-disclaimer"><h3>Exercise &amp; Health Disclaimer</h3><p>Kinetosphere provides exercise and fitness information for general educational purposes only. It is not medical advice and is not a substitute for evaluation, diagnosis, or treatment by a qualified healthcare professional.</p><p>Exercise involves inherent risks, including the risk of injury. You are responsible for determining whether an exercise or program is appropriate for you, using suitable equipment and technique, and stopping if you experience pain, dizziness, unusual shortness of breath, or other concerning symptoms. Consult an appropriate healthcare professional before beginning or changing an exercise program if you have a medical condition, injury, are pregnant, or have other health concerns.</p><p>Content from independent providers reflects those providers’ guidance. Kinetosphere does not guarantee results or that any exercise, program, or provider content is suitable or safe for every person. By choosing to participate, you accept responsibility for your own exercise decisions and participation.</p><div class="meta">Interim legal language — to be reviewed by counsel before commercial launch.</div></div></div></section>
 
   <section id="importerView" class="hidden">
     <div class="panel">
@@ -6519,6 +6519,7 @@ async function updateMuscleMap(ex){
 }
 
 function renderPlayer(){
+  document.body.classList.remove("player-intermission-active","player-set-rest-active");
   if(programIntroPending && activeCircuit?.programContext?.intro?.videoId){ renderProgramIntro(); return; }
   document.body.classList.remove("program-intro-mode");
   el("nextBtn").textContent="NEXT ▶";
@@ -6668,6 +6669,7 @@ function updateSetRestTimer(){
   timer.classList.toggle("countdown-warning",setRestRemaining>0 && setRestRemaining<=10);
 }
 function finishSetRest(){
+  document.body.classList.remove("player-set-rest-active");
   stopSetRestTimer();
   const continuation=setRestContinuation;
   setRestContinuation=null;
@@ -6677,6 +6679,8 @@ function finishSetRest(){
   else renderPlayer();
 }
 function showSetRest(seconds,continuation,label="NEXT SET"){
+  document.body.classList.remove("player-intermission-active");
+  document.body.classList.add("player-set-rest-active");
   const duration=Math.max(0,Math.floor(Number(seconds)||0));
   if(duration<=0){continuation();return false;}
   stopTimer();stopSetRestTimer();stopAllMovementVideo();
@@ -6700,6 +6704,8 @@ function showSetRest(seconds,continuation,label="NEXT SET"){
   return true;
 }
 function showRoundComplete(){
+  document.body.classList.remove("player-set-rest-active");
+  document.body.classList.add("player-intermission-active");
   teardownPlayerRuntime({stopTimers:true});
   el("playerArea").style.display="none";el("roundComplete").style.display="block";
   if(currentRound<activeCircuit.rounds){
@@ -6724,6 +6730,7 @@ function showRoundComplete(){
   }
 }
 function startNextRound(){
+  document.body.classList.remove("player-intermission-active","player-set-rest-active");
   stopSetRestTimer();
   stopRoundRestTimer();
   if(el("setRestComplete")) el("setRestComplete").style.display="none";
