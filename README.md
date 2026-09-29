@@ -82,3 +82,11 @@ RC24 / v6.10.30: Between-round and between-set rest states are now authoritative
 - Provider Expand/Collapse button moved directly beside the provider name.
 - Local-first startup: cached exercise library renders before migration/cloud work; signed-in local circuits hydrate immediately after identity is known, while provider/cloud reconciliation continues in the background.
 - iPad and iPhone portrait layout rules remain isolated from the iPhone-landscape fit mode.
+
+
+## RC26 / v6.10.32 — iPhone landscape Player card revamp
+- iPhone landscape uses a new 58/42 media/control split.
+- Media stays strict 16:9 and is the dominant visual surface.
+- Round/movement metrics are locked in normal flow as the control-card footer.
+- Movement ribbon is a separate sibling row below the cards and cannot be overlapped by progress metrics.
+- iPad and portrait iPhone rules are unchanged.
