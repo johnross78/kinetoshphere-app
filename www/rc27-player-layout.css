@@ -1,0 +1,206 @@
+/* Kinetosphere RC27 / v6.10.33 — landscape Player readability refinement.
+   Loaded into the mobile shell by scripts/apply-rc27-player-layout.mjs during install/build.
+   Scope is intentionally limited to native landscape Player surfaces. */
+
+/* iPhone landscape: preserve dominant media, make the information card readable,
+   and give the movement ribbon enough vertical room for two-line movement names. */
+@media (orientation:landscape) and (max-width:950px) and (max-height:600px){
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .workout-shell{
+    grid-template-columns:minmax(0,59%) minmax(0,41%)!important;
+    justify-content:start!important;
+    justify-items:stretch!important;
+    gap:6px!important;
+  }
+
+  /* Force every layer of the video surface to originate at the left edge. */
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .video-card{
+    justify-self:start!important;
+    align-self:start!important;
+    margin-left:0!important;
+    padding-left:0!important;
+  }
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .video-wrap,
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView #ytFrame,
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView #streamFrame,
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView #offlineVideoFrame{
+    left:0!important;
+    right:auto!important;
+    margin-left:0!important;
+    padding-left:0!important;
+    justify-content:flex-start!important;
+    align-items:stretch!important;
+  }
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView #ytFrame>iframe,
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .video-wrap>iframe{
+    left:0!important;
+    right:auto!important;
+    margin-left:0!important;
+    transform:none!important;
+    transform-origin:left center!important;
+  }
+
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .info-card{
+    padding:5px 7px!important;
+    overflow:hidden!important;
+  }
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .muscle-map-card{
+    flex:0 0 auto!important;
+    margin:0 0 2px!important;
+  }
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .rapid-muscle-image-wrap,
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .info-card.timed-mode .rapid-muscle-image-wrap{
+    height:66px!important;
+    min-height:66px!important;
+  }
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .rapid-muscle-image-wrap img{
+    max-height:64px!important;
+    height:64px!important;
+    width:auto!important;
+  }
+
+  /* Prescription is the elastic/conforming element in the card. */
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .prescription-timer-row{
+    flex:1 1 auto!important;
+    min-height:38px!important;
+    margin:1px 0!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    overflow:hidden!important;
+  }
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .info-card .timer{
+    font-size:clamp(28px,4.4vw,40px)!important;
+    line-height:.95!important;
+    margin:0!important;
+    white-space:nowrap!important;
+  }
+
+  /* Timers/actions/transport form one compact stack directly above progress. */
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .timer-action-row{
+    flex:0 0 auto!important;
+    margin:1px 0!important;
+    gap:3px!important;
+  }
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .timer-action-row .btn{
+    min-height:27px!important;
+    padding:2px 5px!important;
+    font-size:10px!important;
+  }
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .controls{
+    flex:0 0 auto!important;
+    display:grid!important;
+    grid-template-columns:1fr 1fr!important;
+    gap:3px!important;
+    margin:2px 0!important;
+  }
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView #nextBtn{
+    grid-column:1/-1!important;
+    min-height:29px!important;
+    font-size:10px!important;
+  }
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView #prevBtn,
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView #restartBtn{
+    min-height:27px!important;
+    font-size:10px!important;
+  }
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .player-progress-footer{
+    flex:0 0 auto!important;
+    margin:1px 0 0!important;
+    gap:4px!important;
+  }
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .player-progress-footer .metric{
+    min-height:36px!important;
+    padding:3px 5px!important;
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:center!important;
+    justify-content:center!important;
+  }
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .player-progress-footer .big{
+    font-size:18px!important;
+    line-height:.95!important;
+  }
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .player-progress-footer .small{
+    font-size:9px!important;
+    line-height:1!important;
+    letter-spacing:.08em!important;
+  }
+
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .strip{
+    height:72px!important;
+    min-height:72px!important;
+    margin:5px 0 0!important;
+    padding:4px!important;
+  }
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .exercise-list{
+    height:64px!important;
+    max-height:64px!important;
+    grid-auto-columns:minmax(132px,19vw)!important;
+    align-items:stretch!important;
+  }
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .exercise-item{
+    height:60px!important;
+    min-height:60px!important;
+    padding:5px 7px!important;
+    overflow:hidden!important;
+  }
+}
+
+/* iPad landscape: keep the successful RC26 composition, but improve muscle-map
+   legibility and make the upper action buttons easier to hit/read. */
+@media (orientation:landscape) and (min-width:761px) and (max-width:1400px) and (max-height:1050px){
+  html.native-capacitor-shell.native-ipad-shell body.player-active #playerView .player-header-actions{
+    gap:6px!important;
+  }
+  html.native-capacitor-shell.native-ipad-shell body.player-active #playerView .player-header-actions .description-btn{
+    min-height:38px!important;
+    padding:7px 10px!important;
+    font-size:12px!important;
+  }
+  html.native-capacitor-shell.native-ipad-shell body.player-active #playerView .info-card{
+    display:flex!important;
+    flex-direction:column!important;
+  }
+  html.native-capacitor-shell.native-ipad-shell body.player-active #playerView .rapid-muscle-image-wrap,
+  html.native-capacitor-shell.native-ipad-shell body.player-active #playerView .info-card.timed-mode .rapid-muscle-image-wrap{
+    height:138px!important;
+    min-height:138px!important;
+  }
+  html.native-capacitor-shell.native-ipad-shell body.player-active #playerView .rapid-muscle-image-wrap img{
+    max-height:134px!important;
+    height:134px!important;
+    width:auto!important;
+  }
+  html.native-capacitor-shell.native-ipad-shell body.player-active #playerView .prescription-timer-row{
+    min-height:58px!important;
+    margin:4px 0 3px!important;
+  }
+  html.native-capacitor-shell.native-ipad-shell body.player-active #playerView .timer-action-row{
+    margin:2px 0!important;
+  }
+  html.native-capacitor-shell.native-ipad-shell body.player-active #playerView .controls{
+    margin:3px 0 2px!important;
+    padding:5px!important;
+  }
+  html.native-capacitor-shell.native-ipad-shell body.player-active #playerView .controls .btn,
+  html.native-capacitor-shell.native-ipad-shell body.player-active #playerView .timer-action-row .btn{
+    min-height:36px!important;
+    font-size:11px!important;
+  }
+  html.native-capacitor-shell.native-ipad-shell body.player-active #playerView .player-progress-footer{
+    margin-top:auto!important;
+    margin-bottom:0!important;
+    gap:5px!important;
+  }
+  html.native-capacitor-shell.native-ipad-shell body.player-active #playerView .player-progress-footer .metric{
+    min-height:42px!important;
+    padding:4px 6px!important;
+  }
+  html.native-capacitor-shell.native-ipad-shell body.player-active #playerView .player-progress-footer .big{
+    font-size:22px!important;
+    line-height:1!important;
+  }
+  html.native-capacitor-shell.native-ipad-shell body.player-active #playerView .player-progress-footer .small{
+    font-size:10px!important;
+  }
+}
