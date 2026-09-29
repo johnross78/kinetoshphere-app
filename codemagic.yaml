@@ -5,7 +5,7 @@ workflows:
     instance_type: mac_mini_m2
     environment:
       node: v22.11.0
-      xcode: latest
+      xcode: 26.5
       cocoapods: default
     scripts:
       - name: Install dependencies
@@ -37,6 +37,16 @@ workflows:
           JSON
           echo "Generated iOS project:"
           find "$CM_BUILD_DIR/ios/App" -maxdepth 2 -type d \( -name "*.xcodeproj" -o -name "*.xcworkspace" \) -print
+      - name: Validate generated Xcode project
+        script: |
+          set -euo pipefail
+          xcodebuild -version
+          test -f "$CM_BUILD_DIR/ios/App/App.xcodeproj/project.pbxproj"
+          xcodebuild \
+            -project "$CM_BUILD_DIR/ios/App/App.xcodeproj" \
+            -scheme App \
+            -configuration Debug \
+            -showBuildSettings
       - name: Build unsigned simulator app
         script: |
           xcodebuild \
@@ -71,7 +81,7 @@ workflows:
         XCODE_PROJECT: "ios/App/App.xcodeproj"
         XCODE_SCHEME: "App"
       node: v22.11.0
-      xcode: latest
+      xcode: 26.5
       cocoapods: default
     scripts:
       - name: Install dependencies
@@ -110,6 +120,16 @@ workflows:
           cd ios/App
           agvtool new-version -all "$NEXT_BUILD_NUMBER"
           cd "$CM_BUILD_DIR"
+      - name: Validate generated Xcode project
+        script: |
+          set -euo pipefail
+          xcodebuild -version
+          test -f "$CM_BUILD_DIR/$XCODE_PROJECT/project.pbxproj"
+          xcodebuild \
+            -project "$CM_BUILD_DIR/$XCODE_PROJECT" \
+            -scheme "$XCODE_SCHEME" \
+            -configuration Release \
+            -showBuildSettings
       - name: Apply App Store provisioning profiles
         script: |
           xcode-project use-profiles --custom-export-options='{"testFlightInternalTestingOnly": true}'
