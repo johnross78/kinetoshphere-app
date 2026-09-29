@@ -75,3 +75,10 @@ RC23 / v6.10.29: iPad Player header now uses the exact normal Builder header geo
 
 
 RC24 / v6.10.30: Between-round and between-set rest states are now authoritative standalone Player pages on native iOS, preventing the movement Player from leaking underneath on iPad. iPhone landscape now uses a dedicated composition rather than compressed iPad/desktop rules: compact top navigation, strict 16:9 video stage, independent readable control card, normal-flow prescription/controls, horizontal movement strip, and vertical page scrolling only when needed. iPad Player geometry remains frozen apart from the standalone rest-state fix.
+
+## RC25 / v6.10.31 — iPhone Landscape Fit + Startup Cache + Program UX
+- Dedicated height-budgeted iPhone landscape Player fit mode: logo restored, nav right-aligned, 16:9 media flush-left, readable info card, contained progress counters, and fully reachable movement ribbon without requiring browser zoom gestures.
+- Program/Flow intro playback now exposes Mute/Unmute before movement 1; audio state continues into the workout.
+- Provider Expand/Collapse button moved directly beside the provider name.
+- Local-first startup: cached exercise library renders before migration/cloud work; signed-in local circuits hydrate immediately after identity is known, while provider/cloud reconciliation continues in the background.
+- iPad and iPhone portrait layout rules remain isolated from the iPhone-landscape fit mode.

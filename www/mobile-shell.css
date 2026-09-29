@@ -747,3 +747,97 @@ html.native-capacitor-shell body.player-set-rest-active #roundComplete{
     -webkit-overflow-scrolling:touch!important;
   }
 }
+
+/* RC25 / v6.10.31 — dedicated iPhone landscape fit mode.
+   The phone layout is height-budgeted to fit header, stage, info card, and ribbon
+   without relying on browser zoom. Portrait and iPad are intentionally excluded. */
+@media (orientation:landscape) and (max-width:950px) and (max-height:600px){
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active{
+    --ks-phone-stage-h:clamp(176px,52dvh,210px);
+    overflow-x:hidden!important;
+    overflow-y:auto!important;
+  }
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active .app{
+    width:100%!important;
+    min-height:100dvh!important;
+    overflow:visible!important;
+    padding:calc(3px + env(safe-area-inset-top)) calc(7px + env(safe-area-inset-right)) calc(6px + env(safe-area-inset-bottom)) calc(7px + env(safe-area-inset-left))!important;
+  }
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active .topbar{
+    min-height:34px!important;height:34px!important;
+    display:flex!important;align-items:center!important;justify-content:flex-start!important;
+    margin:0 0 3px!important;padding:0!important;gap:10px!important;
+  }
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active .topbar>div:first-child{
+    display:flex!important;align-items:center!important;flex:0 0 auto!important;
+  }
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active .topbar .brand-lockup,
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active .topbar .brand-logo,
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active .topbar img{
+    display:block!important;max-height:29px!important;width:auto!important;max-width:145px!important;
+  }
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active .topbar>.tabs{
+    margin-left:auto!important;justify-content:flex-end!important;gap:4px!important;overflow:visible!important;flex-wrap:nowrap!important;
+  }
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active .topbar .tab{
+    min-height:28px!important;height:28px!important;padding:4px 7px!important;font-size:10px!important;line-height:1!important;
+  }
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .player-movement-bar{
+    min-height:36px!important;margin:0 0 3px!important;gap:5px!important;align-items:center!important;
+  }
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .player-movement-copy h1{
+    font-size:18px!important;line-height:1.02!important;margin:0!important;
+  }
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .cue,
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView #videoSource{display:none!important}
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .player-header-actions{gap:3px!important;flex-wrap:nowrap!important}
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .player-header-actions .description-btn{
+    height:28px!important;min-height:28px!important;padding:3px 6px!important;font-size:9px!important;
+  }
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .workout-shell{
+    display:grid!important;
+    grid-template-columns:calc(var(--ks-phone-stage-h) * 1.7777778) minmax(260px,1fr)!important;
+    justify-content:start!important;align-items:start!important;gap:7px!important;
+    width:100%!important;height:var(--ks-phone-stage-h)!important;min-height:0!important;overflow:visible!important;
+  }
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .video-card{
+    width:calc(var(--ks-phone-stage-h) * 1.7777778)!important;height:var(--ks-phone-stage-h)!important;
+    aspect-ratio:16/9!important;margin:0!important;justify-self:start!important;align-self:start!important;overflow:hidden!important;
+  }
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .video-wrap,
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView #ytFrame,
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView #streamFrame,
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView #offlineVideoFrame,
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView #ytFrame>iframe{
+    position:absolute!important;inset:0!important;width:100%!important;height:100%!important;
+    margin:0!important;padding:0!important;border:0!important;transform:none!important;object-fit:cover!important;
+  }
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .video-wrap{position:relative!important}
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .info-card{
+    position:relative!important;width:100%!important;height:var(--ks-phone-stage-h)!important;max-height:var(--ks-phone-stage-h)!important;
+    min-width:0!important;padding:5px 7px!important;overflow-y:auto!important;overflow-x:hidden!important;display:flex!important;flex-direction:column!important;
+  }
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .muscle-map-card{flex:0 0 auto!important;margin:0 0 2px!important}
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .rapid-muscle-image-wrap,
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .info-card.timed-mode .rapid-muscle-image-wrap{height:48px!important;min-height:48px!important}
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .prescription-timer-row{min-height:36px!important;margin:1px 0!important}
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .info-card .timer{font-size:29px!important;line-height:1!important}
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .spacer{display:none!important}
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .timer-action-row{margin:1px 0!important;gap:3px!important}
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .timer-action-row .btn{min-height:27px!important;padding:3px 6px!important;font-size:10px!important}
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .controls{margin:2px 0!important;gap:3px!important}
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .controls .btn{min-height:27px!important;padding:3px 5px!important;font-size:10px!important}
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .player-progress-footer{
+    position:relative!important;inset:auto!important;flex:0 0 auto!important;margin-top:auto!important;margin-bottom:0!important;padding:0!important;z-index:2!important;
+  }
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .player-progress-footer .metric{padding:2px 5px!important;min-height:30px!important}
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .player-progress-footer .big{font-size:14px!important;line-height:1!important}
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .player-progress-footer .small{font-size:8px!important}
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .strip{
+    position:relative!important;width:100%!important;height:58px!important;min-height:58px!important;margin:4px 0 0!important;padding:4px!important;overflow:hidden!important;
+  }
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .exercise-list{
+    height:50px!important;grid-auto-columns:minmax(118px,17vw)!important;gap:4px!important;overflow-x:auto!important;overflow-y:hidden!important;
+  }
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .exercise-item{min-height:46px!important;padding:4px 6px!important}
+}
