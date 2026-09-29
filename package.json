@@ -1,9 +1,10 @@
 {
   "name": "kinetosphere-mobile",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "private": true,
-  "description": "Kinetosphere iOS RC13: Smart Randomizer preferences, touch circuit reordering, mobile Builder priority, yellow Player navigation, and Builder card cleanup; synchronized with web v6.10.19.",
+  "description": "Kinetosphere iOS RC27: refined iPhone and iPad landscape Player geometry and readability; synchronized with web v6.10.33.",
   "scripts": {
+    "postinstall": "node scripts/apply-rc27-player-layout.mjs",
     "cap:sync": "npx cap sync",
     "cap:add:ios": "npx cap add ios",
     "cap:open:ios": "npx cap open ios",
