@@ -1,10 +1,10 @@
 {
   "name": "kinetosphere-mobile",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "private": true,
-  "description": "Kinetosphere iOS RC27: refined iPhone and iPad landscape Player geometry and readability; synchronized with web v6.10.33.",
+  "description": "Kinetosphere iOS RC28: preserves RC27 baseline while refining iPhone landscape anatomy/prescription layout and ribbon plus iPad control spacing; synchronized with web v6.10.34.",
   "scripts": {
-    "postinstall": "node scripts/apply-rc27-player-layout.mjs",
+    "postinstall": "node scripts/apply-player-layout.mjs",
     "cap:sync": "npx cap sync",
     "cap:add:ios": "npx cap add ios",
     "cap:open:ios": "npx cap open ios",
