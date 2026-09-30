@@ -1,0 +1,133 @@
+/* RC28 / v6.10.34 — surgical refinement on top of the RC27 baseline.
+   Preserve RC27 geometry everywhere except the explicitly scoped changes below. */
+
+/* iPhone landscape only: two-column anatomy/prescription row + iPad-like movement ribbon. */
+@media (orientation:landscape) and (max-width:950px) and (max-height:600px){
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .info-card{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+    grid-template-rows:minmax(86px,1fr) auto auto auto!important;
+    column-gap:7px!important;
+    row-gap:3px!important;
+    align-items:stretch!important;
+  }
+
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .muscle-map-card{
+    grid-column:1!important;
+    grid-row:1!important;
+    min-width:0!important;
+    min-height:0!important;
+    margin:0!important;
+    align-self:stretch!important;
+    overflow:hidden!important;
+  }
+
+  /* Stack the muscle-name copy below the MUSCLES WORKED heading inside the left half. */
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .muscle-map-card > :first-child{
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:flex-start!important;
+    gap:1px!important;
+  }
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .muscle-map-card .meta,
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .muscle-map-card .muted{
+    text-align:left!important;
+    white-space:normal!important;
+    line-height:1.05!important;
+  }
+
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .rapid-muscle-image-wrap,
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .info-card.timed-mode .rapid-muscle-image-wrap{
+    height:62px!important;
+    min-height:62px!important;
+    width:100%!important;
+  }
+
+  /* Prescription/timer owns the right half and scales to the available cell. */
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .prescription-timer-row{
+    grid-column:2!important;
+    grid-row:1!important;
+    min-width:0!important;
+    min-height:0!important;
+    height:auto!important;
+    margin:0!important;
+    padding:0 2px!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    align-self:stretch!important;
+    overflow:hidden!important;
+  }
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .info-card .timer{
+    font-size:clamp(30px,6vw,42px)!important;
+    line-height:.95!important;
+    max-width:100%!important;
+    text-align:center!important;
+  }
+
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .timer-action-row{
+    grid-column:1/-1!important;
+    grid-row:2!important;
+    margin:0!important;
+  }
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .controls{
+    grid-column:1/-1!important;
+    grid-row:3!important;
+    margin:0!important;
+  }
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .player-progress-footer{
+    grid-column:1/-1!important;
+    grid-row:4!important;
+    margin:1px 0 0!important;
+  }
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .spacer{
+    display:none!important;
+    height:0!important;
+    min-height:0!important;
+    flex:0 0 0!important;
+    margin:0!important;
+    padding:0!important;
+  }
+
+  /* Match the successful iPad ribbon proportions: full cards, no cropped lower text. */
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .strip{
+    height:88px!important;
+    min-height:88px!important;
+    padding:5px!important;
+    margin-top:5px!important;
+    overflow:hidden!important;
+  }
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .exercise-list{
+    height:78px!important;
+    max-height:78px!important;
+    grid-auto-columns:minmax(145px,20vw)!important;
+    gap:5px!important;
+    align-items:stretch!important;
+    overflow-x:auto!important;
+    overflow-y:hidden!important;
+  }
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .exercise-item{
+    height:74px!important;
+    min-height:74px!important;
+    padding:6px 8px!important;
+    overflow:hidden!important;
+  }
+}
+
+/* iPad landscape only: close the transport-to-counter gap and change nothing else. */
+@media (orientation:landscape) and (min-width:761px) and (max-width:1400px) and (max-height:1050px){
+  html.native-capacitor-shell.native-ipad-shell body.player-active #playerView .spacer{
+    display:none!important;
+    height:0!important;
+    min-height:0!important;
+    flex:0 0 0!important;
+    margin:0!important;
+    padding:0!important;
+  }
+  html.native-capacitor-shell.native-ipad-shell body.player-active #playerView .controls{
+    margin:2px 0!important;
+  }
+  html.native-capacitor-shell.native-ipad-shell body.player-active #playerView .player-progress-footer{
+    margin:2px 0 0!important;
+  }
+}
