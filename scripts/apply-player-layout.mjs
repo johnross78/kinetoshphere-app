@@ -4,6 +4,7 @@ import path from 'node:path';
 const root = process.cwd();
 const mobileShell = path.join(root, 'www', 'mobile-shell.css');
 const indexFile = path.join(root, 'www', 'index.html');
+const rc29RuntimeFile = path.join(root, 'www', 'rc29-player-runtime.js');
 
 const patches = [
   {
@@ -59,6 +60,15 @@ if (fs.existsSync(indexFile)) {
   html = html.replaceAll('6.10.32', '6.10.35');
   html = html.replaceAll('v6.10.33', 'v6.10.35');
   html = html.replaceAll('6.10.33', '6.10.35');
+  html = html.replaceAll('v6.10.34', 'v6.10.35');
+  html = html.replaceAll('6.10.34', '6.10.35');
+
+  const runtimeTag = '<script src="rc29-player-runtime.js"></script>';
+  html = html.replaceAll(runtimeTag, '');
+  if (fs.existsSync(rc29RuntimeFile)) {
+    html = html.replace('</body>', `${runtimeTag}\n</body>`);
+  }
+
   fs.writeFileSync(indexFile, html);
 }
 
