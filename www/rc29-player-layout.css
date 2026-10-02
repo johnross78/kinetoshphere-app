@@ -1,0 +1,120 @@
+/* RC29 / v6.10.35 — preserve RC27/RC28 baseline; refine only requested Player behavior. */
+
+/* iPhone landscape only: keep RC28's 50/50 anatomy/prescription composition,
+   but let the anatomy artwork consume the useful space inside its half. */
+@media (orientation:landscape) and (max-width:950px) and (max-height:600px){
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .muscle-map-card{
+    display:flex!important;
+    flex-direction:column!important;
+  }
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .muscle-map-title{
+    flex:0 0 auto!important;
+  }
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .rapid-muscle-image-wrap,
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .info-card.timed-mode .rapid-muscle-image-wrap{
+    flex:1 1 auto!important;
+    width:100%!important;
+    height:auto!important;
+    min-height:84px!important;
+    max-height:none!important;
+    padding:1px 2px!important;
+  }
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .rapid-muscle-image-wrap img{
+    width:100%!important;
+    height:100%!important;
+    max-width:100%!important;
+    max-height:none!important;
+    object-fit:contain!important;
+  }
+
+  /* Make the native media surface itself own the full stage after rotation. */
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .video-wrap,
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView #ytFrame,
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView #streamFrame,
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView #offlineVideoFrame{
+    width:100%!important;
+    min-width:100%!important;
+    max-width:100%!important;
+    height:100%!important;
+    inset:0!important;
+    margin:0!important;
+    padding:0!important;
+  }
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView #ytFrame>iframe,
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView #ytFrame>iframe[data-kinetosphere-youtube-bridge]{
+    position:absolute!important;
+    inset:0!important;
+    width:100%!important;
+    min-width:100%!important;
+    max-width:100%!important;
+    height:100%!important;
+    min-height:100%!important;
+    margin:0!important;
+    padding:0!important;
+  }
+
+  /* RC28 got the ribbon height right; RC29 raises the cards inside it so their
+     lower edge/prescription is not clipped by the short iPhone viewport. */
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .strip{
+    padding:3px 5px 7px!important;
+  }
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .exercise-list{
+    height:74px!important;
+    max-height:74px!important;
+    align-items:start!important;
+    transform:translateY(-2px)!important;
+  }
+  html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView .exercise-item{
+    height:70px!important;
+    min-height:70px!important;
+    align-self:start!important;
+  }
+}
+
+/* iPad landscape only: the lower transport/progress cluster is a true footer.
+   The prescription/timer gets all remaining middle space. */
+@media (orientation:landscape) and (min-width:761px) and (max-width:1400px) and (max-height:1050px){
+  html.native-capacitor-shell.native-ipad-shell body.player-active #playerView .info-card{
+    display:flex!important;
+    flex-direction:column!important;
+  }
+  html.native-capacitor-shell.native-ipad-shell body.player-active #playerView .prescription-timer-row{
+    flex:0 1 auto!important;
+    min-height:52px!important;
+    max-height:none!important;
+    overflow:hidden!important;
+  }
+  html.native-capacitor-shell.native-ipad-shell body.player-active #playerView .spacer{
+    display:block!important;
+    flex:1 1 auto!important;
+    height:auto!important;
+    min-height:2px!important;
+    margin:0!important;
+    padding:0!important;
+  }
+  html.native-capacitor-shell.native-ipad-shell body.player-active #playerView .timer-action-row{
+    flex:0 0 auto!important;
+    margin:2px 0!important;
+  }
+  html.native-capacitor-shell.native-ipad-shell body.player-active #playerView .controls{
+    flex:0 0 auto!important;
+    margin:2px 0!important;
+  }
+  html.native-capacitor-shell.native-ipad-shell body.player-active #playerView .player-progress-footer{
+    flex:0 0 auto!important;
+    margin:2px 0 0!important;
+  }
+}
+
+/* Runtime fit helper sets --ks-fit-font-size. Keep its result authoritative
+   without changing portrait geometry unless text actually needs shrinking. */
+#playerView .prescription-timer-row .timer.ks-fit-prescription{
+  font-size:var(--ks-fit-font-size)!important;
+  line-height:.96!important;
+  max-width:100%!important;
+  max-height:100%!important;
+  overflow:hidden!important;
+  text-align:center!important;
+  overflow-wrap:anywhere!important;
+  white-space:normal!important;
+}
