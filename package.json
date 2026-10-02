@@ -1,8 +1,8 @@
 {
   "name": "kinetosphere-mobile",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "private": true,
-  "description": "Kinetosphere iOS RC28: preserves RC27 baseline while refining iPhone landscape anatomy/prescription layout and ribbon plus iPad control spacing; synchronized with web v6.10.34.",
+  "description": "Kinetosphere iOS RC29: preserves RC27/RC28 baseline, fixes Player circuit-hydration race, enlarges iPhone landscape muscle imagery, removes the left media gutter, raises the movement ribbon, bottom-aligns iPad controls, and adds adaptive prescription text; synchronized with web v6.10.35.",
   "scripts": {
     "postinstall": "node scripts/apply-player-layout.mjs",
     "cap:sync": "npx cap sync",
