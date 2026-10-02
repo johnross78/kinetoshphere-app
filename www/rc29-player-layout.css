@@ -43,14 +43,19 @@
   html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView #ytFrame>iframe,
   html.native-capacitor-shell:not(.native-ipad-shell) body.player-active #playerView #ytFrame>iframe[data-kinetosphere-youtube-bridge]{
     position:absolute!important;
-    inset:0!important;
-    width:100%!important;
-    min-width:100%!important;
-    max-width:100%!important;
+    top:0!important;
+    bottom:0!important;
+    left:-9%!important;
+    right:auto!important;
+    width:109%!important;
+    min-width:109%!important;
+    max-width:none!important;
     height:100%!important;
     min-height:100%!important;
     margin:0!important;
     padding:0!important;
+    transform:none!important;
+    transform-origin:left center!important;
   }
 
   /* RC28 got the ribbon height right; RC29 raises the cards inside it so their
