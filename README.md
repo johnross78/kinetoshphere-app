@@ -90,3 +90,12 @@ RC24 / v6.10.30: Between-round and between-set rest states are now authoritative
 - Round/movement metrics are locked in normal flow as the control-card footer.
 - Movement ribbon is a separate sibling row below the cards and cannot be overlapped by progress metrics.
 - iPad and portrait iPhone rules are unchanged.
+
+## RC29 / v6.10.35 — Player reliability + final landscape refinements
+- RC27/RC28 remain the visual baseline; RC29 is additive and tightly scoped.
+- iPhone portrait Player is intentionally preserved.
+- iPhone landscape keeps the RC28 50/50 Muscles Worked / prescription composition, enlarges only the anatomy artwork, overscans the hosted YouTube bridge to eliminate the residual left gutter, and raises the movement cards inside the ribbon so their lower prescription line is no longer clipped.
+- iPad landscape anchors Next / Previous / Restart / Round / Movement as a bottom footer cluster, leaving the middle of the card available for the prescription/timer.
+- Player prescription text now shrinks only as needed to fit its available box, including long empty-state/help messages.
+- Locally launched/randomized circuits are persisted immediately and protected from a background cloud-sync race that could temporarily replace the active Player circuit with an older/empty cloud setting.
+
