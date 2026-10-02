@@ -18,6 +18,12 @@ const patches = [
     start: '/* >>> RC28 PLAYER LAYOUT OVERRIDES >>> */',
     end: '/* <<< RC28 PLAYER LAYOUT OVERRIDES <<< */',
   },
+  {
+    name: 'RC29',
+    file: path.join(root, 'www', 'rc29-player-layout.css'),
+    start: '/* >>> RC29 PLAYER LAYOUT OVERRIDES >>> */',
+    end: '/* <<< RC29 PLAYER LAYOUT OVERRIDES <<< */',
+  },
 ];
 
 if (!fs.existsSync(mobileShell)) {
@@ -49,11 +55,11 @@ fs.writeFileSync(mobileShell, shell);
 
 if (fs.existsSync(indexFile)) {
   let html = fs.readFileSync(indexFile, 'utf8');
-  html = html.replaceAll('v6.10.32', 'v6.10.34');
-  html = html.replaceAll('6.10.32', '6.10.34');
-  html = html.replaceAll('v6.10.33', 'v6.10.34');
-  html = html.replaceAll('6.10.33', '6.10.34');
+  html = html.replaceAll('v6.10.32', 'v6.10.35');
+  html = html.replaceAll('6.10.32', '6.10.35');
+  html = html.replaceAll('v6.10.33', 'v6.10.35');
+  html = html.replaceAll('6.10.33', '6.10.35');
   fs.writeFileSync(indexFile, html);
 }
 
-console.log('Applied Kinetosphere RC27 baseline plus RC28 / v6.10.34 Player refinements.');
+console.log('Applied Kinetosphere RC27/RC28 baseline plus RC29 / v6.10.35 Player refinements.');
